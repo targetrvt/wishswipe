@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'WishSwipe') }} - Swipe Your Way to Great Deals</title>
+    <link rel="icon" href="images/wishSwipe_logo.png" type="favicon.ico"/>
 
     <meta name="description" content="Discover amazing products in your area with WishSwipe's innovative swiping marketplace.">
     <meta name="keywords" content="marketplace, shopping, swipe, local deals, buy sell">

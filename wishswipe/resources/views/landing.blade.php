@@ -117,14 +117,17 @@
             <div class="hero-visual">
                 <div class="phone-mockup">
                     <div class="phone-screen">
+                        <!-- Card 1 -->
                         <div class="swipe-card active">
                             <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop" alt="{{ __('Product') }}">
                             <div class="card-info">
-                                <h4>MacBook Pro</h4>
+                                <h4>Apple Watch 11</h4>
                                 <p class="price">$1,299</p>
                                 <p class="location">📍 {{ __('2km away') }}</p>
                             </div>
                         </div>
+
+                        <!-- Card 2 -->
                         <div class="swipe-card">
                             <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=300&fit=crop" alt="{{ __('Product') }}">
                             <div class="card-info">
@@ -133,7 +136,38 @@
                                 <p class="location">📍 {{ __('1km away') }}</p>
                             </div>
                         </div>
+
+                        <!-- Card 3 -->
+                        <div class="swipe-card">
+                            <img src="https://plus.unsplash.com/premium_photo-1669380425564-6e1a281a4d30?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8U2Ftc3VuZyUyMHR2fGVufDB8fDB8fHww" alt="Samsung TV">
+                            <div class="card-info">
+                                <h4>Samsung TV</h4>
+                                <p class="price">$399</p>
+                                <p class="location">📍 {{ __('3km away') }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Card 4 -->
+                        <div class="swipe-card">
+                            <img src="https://images.unsplash.com/photo-1608354580875-30bd4168b351?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y29mZmVlJTIwbWFrZXJ8ZW58MHx8MHx8fDA%3D" alt="Coffee Maker">
+                            <div class="card-info">
+                                <h4>Coffee Maker</h4>
+                                <p class="price">$45</p>
+                                <p class="location">📍 {{ __('4km away') }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Card 5 -->
+                        <div class="swipe-card">
+                            <img src="https://images.unsplash.com/photo-1534150034764-046bf225d3fa?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8bW91bnRhaW4lMjBiaWtlfGVufDB8fDB8fHww" alt="Mountain Bike">
+                            <div class="card-info">
+                                <h4>Mountain Bike</h4>
+                                <p class="price">$250</p>
+                                <p class="location">📍 {{ __('5km away') }}</p>
+                            </div>
+                        </div>
                     </div>
+
                     <div class="swipe-buttons">
                         <button class="swipe-btn dislike" onclick="swipeLeft()">
                             <i class="fas fa-times"></i>
@@ -170,24 +204,10 @@
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-map-marker-alt"></i>
-                    </div>
-                    <h3>{{ __('Location-Based') }}</h3>
-                    <p>{{ __('Find items near you. No more waiting for shipping or paying expensive delivery fees.') }}</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
                         <i class="fas fa-shield-alt"></i>
                     </div>
                     <h3>{{ __('Secure Transactions') }}</h3>
                     <p>{{ __('Built-in security features and verification system to ensure safe buying and selling.') }}</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-tags"></i>
-                    </div>
-                    <h3>{{ __('Smart Categories') }}</h3>
-                    <p>{{ __('Easily browse through organized categories or let AI suggest the perfect items.') }}</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">

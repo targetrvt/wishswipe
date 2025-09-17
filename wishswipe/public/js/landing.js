@@ -73,17 +73,17 @@ function initSwipeDemo() {
     
     let currentCardIndex = 0;
     
-    // Auto-cycle through cards
-    setInterval(() => {
-        if (cards.length > 0) {
-            // Hide current card
-            cards[currentCardIndex].classList.remove('active');
+    // // Auto-cycle through cards
+    // setInterval(() => {
+    //     if (cards.length > 0) {
+    //         // Hide current card
+    //         cards[currentCardIndex].classList.remove('active');
             
-            // Show next card
-            currentCardIndex = (currentCardIndex + 1) % cards.length;
-            cards[currentCardIndex].classList.add('active');
-        }
-    }, 4000);
+    //         // Show next card
+    //         currentCardIndex = (currentCardIndex + 1) % cards.length;
+    //         cards[currentCardIndex].classList.add('active');
+    //     }
+    // }, 4000);
 
     // Manual swipe controls
     if (likeBtn) {

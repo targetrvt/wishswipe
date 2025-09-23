@@ -51,8 +51,12 @@
     <nav class="nav-container">
         <div class="nav-content">
             <div class="nav-brand">
-                <i class="fas fa-shopping-cart brand-icon"></i>
-                <span class="brand-text">{{ config('app.name', 'WishSwipe') }}</span>
+                <a href="{{ url('/') }}">
+                    <img src="{{ asset('images/wishswipe_logo_black.png') }}"
+                        alt="{{ config('app.name', 'WishSwipe') }}"
+                        class="brand-logo"
+                        style="height: 80px !important; max-width: 350px !important;">
+                </a>
             </div>
             <div class="nav-links">
                 <a href="#features" class="nav-link">{{ __('Features') }}</a>

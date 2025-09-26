@@ -9,15 +9,13 @@ class WishswipeFresh extends Command
 {
     /**
      * The name and signature of the console command.
-     *
-     * --seed will run db:seed after migrate
      */
-    protected $signature = 'wishswipe:fresh {--seed : Run db:seed after migrate}';
+    protected $signature = 'wishswipe:fresh';
 
     /**
      * The console command description.
      */
-    protected $description = 'Drop all tables (destructive) and then run php artisan migrate. Optionally runs db:seed afterwards.';
+    protected $description = 'Drop all tables (destructive), run migrations, and then run db:seed.';
 
     public function handle()
     {
@@ -73,12 +71,11 @@ class WishswipeFresh extends Command
             $this->info('Running migrations...');
             $this->call('migrate', ['--force' => true]);
 
-            if ($this->option('seed')) {
-                $this->info('Running db:seed...');
-                $this->call('db:seed', ['--force' => true]);
-            }
+            // Vienmēr palaiž seederus
+            $this->info('Running db:seed...');
+            $this->call('db:seed', ['--force' => true]);
 
-            $this->info('Migrations finished.');
+            $this->info('Migrations and seeders finished.');
             return 0;
         } catch (\Exception $e) {
             $this->error('An error occurred: ' . $e->getMessage());

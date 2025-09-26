@@ -14,12 +14,14 @@ class UserSeeder extends Seeder
             'name' => 'Regular User',
             'email' => 'user@user.com',
             'password' => Hash::make('12345678'),
+            'avatar_url' => 'https://via.placeholder.com/100?text=User',
         ]);
 
         User::create([
             'name' => 'Admin User',
             'email' => 'admin@admin.com',
             'password' => Hash::make('87654321'),
+            'avatar_url' => 'https://via.placeholder.com/100?text=Admin',
         ]);
     }
 }

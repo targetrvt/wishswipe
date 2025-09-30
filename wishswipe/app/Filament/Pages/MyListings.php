@@ -118,9 +118,8 @@ class MyListings extends Page implements HasForms, HasTable
                             
                             Forms\Components\Select::make('category_id')
                                 ->label('Category')
-                                ->options(Category::where('is_active', true)->pluck('name', 'id'))
-                                ->required()
-                                ->searchable(),
+                                ->options(fn () => Category::where('is_active', true)->pluck('name', 'id'))
+                                ->required(),         
                             
                             Forms\Components\TextInput::make('price')
                                 ->required()

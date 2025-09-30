@@ -39,8 +39,7 @@ class ProductResource extends Resource
                         Forms\Components\Select::make('category_id')
                             ->label('Category')
                             ->options(Category::where('is_active', true)->pluck('name', 'id'))
-                            ->required()
-                            ->searchable(),
+                            ->required(),
                         
                         Forms\Components\TextInput::make('price')
                             ->required()

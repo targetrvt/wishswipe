@@ -11,41 +11,55 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Notifications\Notification;
 
 class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
+    protected static ?string $navigationIcon = 'heroicon-o-cube';
     
-    protected static ?string $navigationGroup = 'Management';
+    protected static ?string $navigationGroup = 'Marketplace';
+    
+    protected static ?int $navigationSort = 1;
+    
+    protected static ?string $recordTitleAttribute = 'title';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\Section::make('Product Information')
+                    ->description('Enter the basic information about your product')
                     ->schema([
                         Forms\Components\TextInput::make('title')
                             ->required()
                             ->maxLength(255)
-                            ->columnSpanFull(),
+                            ->placeholder('e.g., iPhone 13 Pro Max')
+                            ->columnSpanFull()
+                            ->live(onBlur: true),
                         
                         Forms\Components\Textarea::make('description')
                             ->required()
-                            ->rows(4)
-                            ->columnSpanFull(),
+                            ->rows(5)
+                            ->placeholder('Provide a detailed description of your product...')
+                            ->columnSpanFull()
+                            ->helperText('Be specific about condition, features, and any defects'),
                         
                         Forms\Components\Select::make('category_id')
-                            ->label('Category')
-                            ->options(Category::where('is_active', true)->pluck('name', 'id'))
-                            ->required(),
+                                ->label('Category')
+                                ->options(fn () => Category::where('is_active', true)->pluck('name', 'id'))
+                                ->required(),
                         
                         Forms\Components\TextInput::make('price')
                             ->required()
                             ->numeric()
                             ->prefix('$')
-                            ->minValue(0),
+                            ->minValue(0.01)
+                            ->maxValue(999999.99)
+                            ->step(0.01)
+                            ->placeholder('0.00')
+                            ->helperText('Set a competitive price'),
                         
                         Forms\Components\Select::make('condition')
                             ->options([
@@ -65,42 +79,78 @@ class ProductResource extends Resource
                             ->required()
                             ->default('available'),
                     ])
-                    ->columns(2),
+                    ->columns(2)
+                    ->collapsible(),
                 
                 Forms\Components\Section::make('Location')
+                    ->description('Help buyers find products near them')
                     ->schema([
                         Forms\Components\TextInput::make('location')
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->placeholder('City, State or ZIP code')
+                            ->columnSpanFull(),
                         
                         Forms\Components\TextInput::make('latitude')
                             ->numeric()
-                            ->step(0.0000001),
+                            ->step(0.0000001)
+                            ->placeholder('e.g., 40.7128')
+                            ->helperText('Optional: GPS coordinates'),
                         
                         Forms\Components\TextInput::make('longitude')
                             ->numeric()
-                            ->step(0.0000001),
+                            ->step(0.0000001)
+                            ->placeholder('e.g., -74.0060')
+                            ->helperText('Optional: GPS coordinates'),
                     ])
-                    ->columns(3),
+                    ->columns(3)
+                    ->collapsible(),
                 
-                Forms\Components\Section::make('Images')
+                Forms\Components\Section::make('Product Images')
+                    ->description('Upload up to 5 high-quality images')
                     ->schema([
                         Forms\Components\FileUpload::make('images')
                             ->multiple()
                             ->image()
                             ->maxFiles(5)
                             ->directory('product-images')
-                            ->columnSpanFull(),
-                    ]),
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([
+                                '1:1',
+                                '4:3',
+                                '16:9',
+                            ])
+                            ->maxSize(5120)
+                            ->helperText('Recommended: Square images, at least 800x800px')
+                            ->columnSpanFull()
+                            ->reorderable()
+                            ->appendFiles()
+                            ->panelLayout('grid')
+                            ->imagePreviewHeight('200'),
+                    ])
+                    ->collapsible(),
                 
                 Forms\Components\Section::make('Settings')
                     ->schema([
                         Forms\Components\Toggle::make('is_active')
                             ->default(true)
-                            ->label('Active'),
+                            ->label('Active Listing')
+                            ->helperText('Inactive listings won\'t appear in search results')
+                            ->inline(false),
                         
                         Forms\Components\Hidden::make('user_id')
                             ->default(fn () => auth()->id()),
-                    ]),
+                        
+                        Forms\Components\Placeholder::make('created_at')
+                            ->label('Created')
+                            ->content(fn ($record) => $record?->created_at?->diffForHumans() ?? '-')
+                            ->hidden(fn ($record) => $record === null),
+                        
+                        Forms\Components\Placeholder::make('view_count')
+                            ->label('Total Views')
+                            ->content(fn ($record) => number_format($record?->view_count ?? 0))
+                            ->hidden(fn ($record) => $record === null),
+                    ])
+                    ->columns(2),
             ]);
     }
 
@@ -113,86 +163,180 @@ class ProductResource extends Resource
                     ->circular()
                     ->stacked()
                     ->limit(1)
+                    ->defaultImageUrl(url('/images/placeholder.jpg'))
                     ->getStateUsing(fn ($record) => $record->images[0] ?? null),
                 
                 Tables\Columns\TextColumn::make('title')
                     ->searchable()
                     ->sortable()
-                    ->limit(30),
-                
-                Tables\Columns\TextColumn::make('category.name')
-                    ->badge()
-                    ->searchable()
-                    ->sortable(),
-                
-                Tables\Columns\TextColumn::make('user.name')
-                    ->label('Seller')
-                    ->searchable()
-                    ->sortable(),
+                    ->limit(30)
+                    ->weight('bold')
+                    ->description(fn ($record) => $record->category->name ?? 'Uncategorized'),
                 
                 Tables\Columns\TextColumn::make('price')
                     ->money('USD')
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold')
+                    ->color('success'),
                 
                 Tables\Columns\BadgeColumn::make('condition')
                     ->colors([
                         'success' => 'new',
-                        'warning' => 'like_new',
-                        'danger' => 'used',
-                    ]),
+                        'info' => 'like_new',
+                        'warning' => 'used',
+                    ])
+                    ->formatStateUsing(fn ($state) => ucfirst(str_replace('_', ' ', $state))),
                 
                 Tables\Columns\BadgeColumn::make('status')
                     ->colors([
                         'success' => 'available',
                         'warning' => 'reserved',
                         'danger' => 'sold',
-                    ]),
+                    ])
+                    ->formatStateUsing(fn ($state) => ucfirst($state)),
                 
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean()
-                    ->label('Active'),
+                    ->label('Active')
+                    ->sortable(),
                 
                 Tables\Columns\TextColumn::make('view_count')
                     ->label('Views')
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter()
+                    ->icon('heroicon-m-eye'),
                 
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
+                    ->since()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('category')
-                    ->relationship('category', 'name'),
+                    ->relationship('category', 'name')
+                    ->preload()
+                    ->multiple(),
                 
                 Tables\Filters\SelectFilter::make('condition')
                     ->options([
                         'new' => 'New',
                         'like_new' => 'Like New',
                         'used' => 'Used',
-                    ]),
+                    ])
+                    ->multiple(),
                 
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
                         'available' => 'Available',
                         'reserved' => 'Reserved',
                         'sold' => 'Sold',
-                    ]),
+                    ])
+                    ->multiple(),
                 
                 Tables\Filters\TernaryFilter::make('is_active')
-                    ->label('Active'),
+                    ->label('Active Status')
+                    ->placeholder('All products')
+                    ->trueLabel('Active only')
+                    ->falseLabel('Inactive only'),
+                
+                Tables\Filters\Filter::make('has_images')
+                    ->label('Has Images')
+                    ->query(fn (Builder $query): Builder => $query->whereNotNull('images')),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    
+                    Tables\Actions\Action::make('mark_sold')
+                        ->label('Mark as Sold')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->visible(fn ($record) => $record->status !== 'sold')
+                        ->action(function ($record) {
+                            $record->update(['status' => 'sold']);
+                            Notification::make()
+                                ->success()
+                                ->title('Product marked as sold')
+                                ->send();
+                        }),
+                    
+                    Tables\Actions\Action::make('mark_available')
+                        ->label('Mark as Available')
+                        ->icon('heroicon-o-arrow-path')
+                        ->color('info')
+                        ->requiresConfirmation()
+                        ->visible(fn ($record) => $record->status === 'sold')
+                        ->action(function ($record) {
+                            $record->update(['status' => 'available']);
+                            Notification::make()
+                                ->success()
+                                ->title('Product marked as available')
+                                ->send();
+                        }),
+                    
+                    Tables\Actions\Action::make('toggle_active')
+                        ->label(fn ($record) => $record->is_active ? 'Deactivate' : 'Activate')
+                        ->icon(fn ($record) => $record->is_active ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
+                        ->color(fn ($record) => $record->is_active ? 'warning' : 'success')
+                        ->requiresConfirmation()
+                        ->action(function ($record) {
+                            $record->update(['is_active' => !$record->is_active]);
+                            Notification::make()
+                                ->success()
+                                ->title('Product updated')
+                                ->send();
+                        }),
+                    
+                    Tables\Actions\DeleteAction::make(),
+                ])->icon('heroicon-m-ellipsis-vertical')
+                ->button()
+                ->label('Actions'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('mark_available')
+                        ->label('Mark as Available')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->action(fn ($records) => $records->each->update(['status' => 'available'])),
+                    
+                    Tables\Actions\BulkAction::make('mark_sold')
+                        ->label('Mark as Sold')
+                        ->icon('heroicon-o-x-circle')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->action(fn ($records) => $records->each->update(['status' => 'sold'])),
+                    
+                    Tables\Actions\BulkAction::make('activate')
+                        ->label('Activate')
+                        ->icon('heroicon-o-eye')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->action(fn ($records) => $records->each->update(['is_active' => true])),
+                    
+                    Tables\Actions\BulkAction::make('deactivate')
+                        ->label('Deactivate')
+                        ->icon('heroicon-o-eye-slash')
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->action(fn ($records) => $records->each->update(['is_active' => false])),
+                    
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('created_at', 'desc');
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make()
+                    ->label('Create your first product')
+                    ->icon('heroicon-m-plus')
+                    ->button(),
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->poll('30s')
+            ->striped();
     }
 
     public static function getRelations(): array
@@ -214,5 +358,15 @@ class ProductResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->with(['category', 'user']);
+    }
+    
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::where('user_id', auth()->id())->count();
+    }
+    
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'success';
     }
 }

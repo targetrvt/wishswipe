@@ -8,7 +8,6 @@ use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable implements HasAvatar
 {
@@ -49,14 +48,15 @@ class User extends Authenticatable implements HasAvatar
             'password' => 'hashed',
         ];
     }
-
-    /**
-     * Get the URL of the user's avatar for Filament.
-     *
-     * @return string|null
-     */
+    
     public function getFilamentAvatarUrl(): ?string
     {
-        return $this->avatar_url ? Storage::url($this->avatar_url) : null;
+
+        if ($this->avatar_url) {
+            return \Storage::disk('public')->url($this->avatar_url);
+        }
+
+        // Return a default avatar URL if none is set
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name);
     }
 }

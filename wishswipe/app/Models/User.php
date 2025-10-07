@@ -56,13 +56,6 @@ class User extends Authenticatable implements HasAvatar
      */
     public function getFilamentAvatarUrl(): ?string
     {
-        // Check if avatar_url is set
-        if ($this->avatar_url) {
-            // Generate the correct URL to the avatar file
-            return asset('storage/' . $this->avatar_url);
-        }
-
-        // Return a default avatar URL if none is set
-        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name);
+        return $this->avatar ? "/" . $this->avatar : null;
     }
 }

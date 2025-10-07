@@ -22,6 +22,11 @@ class CategoryResource extends Resource
     
     protected static ?int $navigationSort = 1;
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->hasRole('super_admin');
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -240,5 +245,10 @@ class CategoryResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::where('is_active', true)->count();
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole('super_admin');
     }
 }

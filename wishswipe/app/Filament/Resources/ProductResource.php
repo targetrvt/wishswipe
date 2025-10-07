@@ -357,7 +357,14 @@ class ProductResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['category', 'user']);
+        $query = parent::getEloquentQuery()->with(['category', 'user']);
+        
+        // Users can only see their own products, admins can see all
+        if (!auth()->user()->hasRole('super_admin')) {
+            $query->where('user_id', auth()->id());
+        }
+        
+        return $query;
     }
     
     public static function getNavigationBadge(): ?string
@@ -368,5 +375,11 @@ class ProductResource extends Resource
     public static function getNavigationBadgeColor(): ?string
     {
         return 'success';
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        // Hide from navigation for regular users - they should use "My Listings" page instead
+        return auth()->user()->hasRole('super_admin');
     }
 }

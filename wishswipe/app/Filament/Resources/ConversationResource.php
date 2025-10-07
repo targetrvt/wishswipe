@@ -20,6 +20,11 @@ class ConversationResource extends Resource
     protected static ?string $navigationGroup = 'Management';
     
     protected static ?int $navigationSort = 5;
+    
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->hasRole('super_admin');
+    }
 
     public static function form(Form $form): Form
     {
@@ -180,5 +185,10 @@ class ConversationResource extends Resource
         ->count();
         
         return $unreadCount > 0 ? (string) $unreadCount : null;
+    }
+    
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole('super_admin');
     }
 }

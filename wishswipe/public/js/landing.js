@@ -5,10 +5,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initSmoothScrolling();
     initParallax();
 });
+
 function initNavigation() {
     const nav = document.querySelector('.nav-container');
-    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-    const navLinks = document.querySelector('.nav-links');
 
     // Scroll effect
     let lastScrollTop = 0;
@@ -32,15 +31,8 @@ function initNavigation() {
         lastScrollTop = scrollTop;
     });
 
-    // Mobile menu toggle
-    if (mobileMenuBtn && navLinks) {
-        mobileMenuBtn.addEventListener('click', function() {
-            navLinks.classList.toggle('active');
-            const icon = mobileMenuBtn.querySelector('i');
-            icon.classList.toggle('fa-bars');
-            icon.classList.toggle('fa-times');
-        });
-    }
+    // NOTE: Mobile menu is handled in the HTML inline script
+    // No need for duplicate implementation here
 }
 
 // Scroll animations
@@ -73,18 +65,6 @@ function initSwipeDemo() {
     
     let currentCardIndex = 0;
     
-    // // Auto-cycle through cards
-    // setInterval(() => {
-    //     if (cards.length > 0) {
-    //         // Hide current card
-    //         cards[currentCardIndex].classList.remove('active');
-            
-    //         // Show next card
-    //         currentCardIndex = (currentCardIndex + 1) % cards.length;
-    //         cards[currentCardIndex].classList.add('active');
-    //     }
-    // }, 4000);
-
     // Manual swipe controls
     if (likeBtn) {
         likeBtn.addEventListener('click', swipeRight);
@@ -209,12 +189,20 @@ function initSmoothScrolling() {
                     top: targetPosition,
                     behavior: 'smooth'
                 });
+
+                // Close mobile menu if open
+                const mobileMenu = document.getElementById('mobileMenu');
+                if (mobileMenu && mobileMenu.classList.contains('active')) {
+                    if (typeof toggleMobileMenu === 'function') {
+                        toggleMobileMenu();
+                    }
+                }
             }
         });
     });
 }
 
-// effct for hero section
+// effect for hero section
 function initParallax() {
     const heroSection = document.querySelector('.hero-section');
     
@@ -228,7 +216,7 @@ function initParallax() {
     });
 }
 
-// Vid modal functionality
+// Video modal functionality
 function playVideo() {
     // modal overlay
     const modal = document.createElement('div');
@@ -259,7 +247,7 @@ function playVideo() {
         overflow: hidden;
     `;
     
-    // placeholder video, kad bus done projekts tad video!!!
+    // placeholder video
     const video = document.createElement('div');
     video.innerHTML = `
         <div style="
@@ -366,7 +354,7 @@ if (heroStats) {
     statsObserver.observe(heroStats);
 }
 
-// CSS animations
+// CSS animations (removed duplicate mobile menu styles)
 const style = document.createElement('style');
 style.textContent = `
     @keyframes cartPop {
@@ -403,28 +391,10 @@ style.textContent = `
             opacity: 0;
         }
     }
-    
-    .nav-links.active {
-        display: flex !important;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: white;
-        flex-direction: column;
-        padding: 1rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    @media (max-width: 768px) {
-        .nav-links {
-            display: none;
-        }
-    }
 `;
 document.head.appendChild(style);
 
-// easter ;)
+// easter egg ;)
 let konamiCode = [];
 const konamiSequence = [
     'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown',
@@ -486,7 +456,7 @@ document.addEventListener('keydown', function(e) {
 window.addEventListener('load', function() {
     document.body.classList.add('loaded');
     
-    // Trigger anim
+    // Trigger animation
     const heroTitle = document.querySelector('.hero-title');
     const heroDescription = document.querySelector('.hero-description');
     
@@ -512,7 +482,7 @@ function debounce(func, wait) {
     };
 }
 
-//debouncing to scroll events
+// debouncing to scroll events
 const debouncedParallax = debounce(function() {
     const heroSection = document.querySelector('.hero-section');
     const scrolled = window.pageYOffset;

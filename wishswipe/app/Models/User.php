@@ -57,6 +57,6 @@ class User extends Authenticatable implements HasAvatar
         }
 
         // Return a default avatar URL if none is set
-        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name);
+        return $this->avatar_url ? "/" . $this->avatar_url: null;
     }
 }

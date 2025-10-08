@@ -2,35 +2,50 @@
 
 return [
     'landing' => [
+        'meta' => [
+            'title' => 'Swipe Your Way to Great Deals',
+            'description' => 'Discover amazing products in your area with WishSwipe\'s innovative swiping marketplace.',
+            'keywords' => 'marketplace, shopping, swipe, local deals, buy sell',
+            'og_title' => 'WishSwipe - Swipe Your Way to Great Deals',
+            'og_description' => 'Discover amazing products in your area with our innovative swiping marketplace.',
+            'twitter_title' => 'WishSwipe - Swipe Your Way to Great Deals',
+            'twitter_description' => 'Discover amazing products in your area with our innovative swiping marketplace.',
+            'schema_description' => 'Discover amazing products in your area with our innovative swiping marketplace. Revolutionary shopping experience.',
+        ],
+
         'nav' => [
             'features' => 'Features',
             'how_it_works' => 'How it Works',
             'categories' => 'Categories',
             'login' => 'Login',
-            'signup' => 'Get Started',
+            'get_started' => 'Get Started',
+            'dashboard' => 'Dashboard',
         ],
+
         'hero' => [
-            'tag' => '🎯 Smart Shopping Made Simple',
-            'title' => 'Swipe Your Way to Great Deals',
+            'swipe_your_way' => 'Swipe Your Way to',
+            'great_deals' => 'Great Deals',
             'description' => 'Discover amazing products in your area with our innovative swiping marketplace. Swipe right on items you love, left on ones you don\'t.',
-            'start_trial' => 'Start Swiping',
-            'explore_features' => 'Watch Demo',
+            'start_swiping' => 'Start Swiping',
+            'go_to_app' => 'Go to App',
+            'watch_demo' => 'Watch Demo',
+            'product' => 'Product',
+            'away' => ':distance away',
             'stats' => [
-                'active_users' => 'Happy Users',
-                'managed_monthly' => 'Items Swiped',
-                'satisfaction' => 'Successful Deals',
+                'happy_users' => 'Happy Users',
+                'items_swiped' => 'Items Swiped',
+                'successful_deals' => 'Successful Deals',
             ],
         ],
+
         'features' => [
-            'tag' => '✨ Features',
             'title' => 'Why Choose WishSwipe?',
             'description' => 'Experience the future of online marketplace shopping',
-            'learn_more' => 'Learn more',
             'intuitive_swiping' => [
                 'title' => 'Intuitive Swiping',
-                'description' => 'Browse products quickly. Quick decisions, better discoveries.',
+                'description' => 'Browse products. Quick decisions, better discoveries.',
             ],
-            'ai_powered' => [
+            'ai_recommendations' => [
                 'title' => 'AI-Powered Recommendations',
                 'description' => 'Our smart algorithm learns your preferences and shows you items you\'ll love.',
             ],
@@ -43,8 +58,8 @@ return [
                 'description' => 'Connect instantly with sellers through our built-in messaging system.',
             ],
         ],
+
         'how_it_works' => [
-            'tag' => '📱 How It Works',
             'title' => 'How It Works',
             'description' => 'Get started in just 3 simple steps',
             'step1' => [
@@ -60,45 +75,60 @@ return [
                 'description' => 'When you match with an item, instantly chat with the seller and arrange your purchase.',
             ],
         ],
+
         'categories' => [
-            'tag' => '🏷️ Categories',
             'title' => 'Popular Categories',
             'description' => 'Discover amazing deals across all categories',
-            'electronics' => 'Electronics',
-            'electronics_desc' => 'Phones, laptops, gadgets',
-            'fashion' => 'Fashion',
-            'fashion_desc' => 'Clothing, shoes, accessories',
-            'home_garden' => 'Home & Garden',
-            'home_garden_desc' => 'Furniture, decor, tools',
-            'vehicles' => 'Vehicles',
-            'vehicles_desc' => 'Cars, bikes, parts',
-            'books_media' => 'Books & Media',
-            'books_media_desc' => 'Books, games, movies',
-            'sports' => 'Sports',
-            'sports_desc' => 'Equipment, gear, fitness',
+            'electronics' => [
+                'title' => 'Electronics',
+                'description' => 'Phones, laptops, gadgets',
+            ],
+            'fashion' => [
+                'title' => 'Fashion',
+                'description' => 'Clothing, shoes, accessories',
+            ],
+            'home_garden' => [
+                'title' => 'Home & Garden',
+                'description' => 'Furniture, decor, tools',
+            ],
+            'vehicles' => [
+                'title' => 'Vehicles',
+                'description' => 'Cars, bikes, parts',
+            ],
+            'books_media' => [
+                'title' => 'Books & Media',
+                'description' => 'Books, games, movies',
+            ],
+            'sports' => [
+                'title' => 'Sports',
+                'description' => 'Equipment, gear, fitness',
+            ],
         ],
+
         'cta' => [
             'title' => 'Ready to Start Swiping?',
             'description' => 'Join thousands of users who are already discovering amazing deals in their neighborhood.',
-            'start_trial' => 'Join WishSwipe',
+            'join' => 'Join WishSwipe',
+            'sign_in' => 'Sign In',
+            'go_to_dashboard' => 'Go to Dashboard',
+            'logout' => 'Logout',
         ],
+
         'footer' => [
-            'description' => 'The future of marketplace shopping',
+            'tagline' => 'The future of marketplace shopping',
+            'product' => 'Product',
+            'features' => 'Features',
+            'how_it_works' => 'How it Works',
+            'categories' => 'Categories',
             'company' => 'Company',
-            'products' => 'Products',
+            'about' => 'About',
+            'contact' => 'Contact',
+            'careers' => 'Careers',
             'support' => 'Support',
-            'links' => [
-                'about' => 'About',
-                'careers' => 'Careers',
-                'blog' => 'Blog',
-                'press' => 'Press',
-                'contact' => 'Contact',
-                'help_center' => 'Help Center',
-                'faq' => 'FAQ',
-                'safety' => 'Safety',
-                'terms' => 'Terms',
-            ],
-            'copyright' => '© 2025 WishSwipe. All rights reserved.',
+            'help_center' => 'Help Center',
+            'safety' => 'Safety',
+            'terms' => 'Terms',
+            'rights' => 'All rights reserved.',
         ],
     ],
 ];

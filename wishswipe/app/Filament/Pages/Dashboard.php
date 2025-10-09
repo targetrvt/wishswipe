@@ -6,16 +6,14 @@ use Filament\Pages\Dashboard as BaseDashboard;
 use App\Models\Product;
 use App\Models\Swipe;
 use App\Models\Matched;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Conversation;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class Dashboard extends BaseDashboard
 {
     protected static ?string $navigationIcon = 'heroicon-o-home';
-    
     protected static ?int $navigationSort = 0;
-    
     protected static string $view = 'filament.pages.dashboard';
 
     public function getWidgets(): array
@@ -29,176 +27,190 @@ class Dashboard extends BaseDashboard
     }
 
     /**
-     * Get comprehensive user statistics
+     * Get overview metrics
      */
-    public function getStats(): array
+    public function getOverviewMetrics(): array
     {
-        $userId = Auth::id();
+        $userId = auth()->id();
 
         return [
-            'total_products' => Product::where('user_id', $userId)->count(),
-            'active_products' => Product::where('user_id', $userId)
-                ->where('status', 'available')
-                ->count(),
-            'sold_products' => Product::where('user_id', $userId)
-                ->where('status', 'sold')
-                ->count(),
-            'total_swipes' => Swipe::where('user_id', $userId)->count(),
-            'right_swipes' => Swipe::where('user_id', $userId)
-                ->where('direction', 'right')
-                ->count(),
-            'total_matches' => Matched::where('buyer_id', $userId)
-                ->orWhere('seller_id', $userId)
-                ->count(),
-            'total_views' => Product::where('user_id', $userId)->sum('view_count'),
-            'total_revenue' => Product::where('user_id', $userId)
-                ->where('status', 'sold')
-                ->sum('price'),
+            'listings' => [
+                'total' => Product::where('user_id', $userId)->count(),
+                'active' => Product::where('user_id', $userId)->where('status', 'available')->count(),
+                'sold' => Product::where('user_id', $userId)->where('status', 'sold')->count(),
+            ],
+            'engagement' => [
+                'views' => Product::where('user_id', $userId)->sum('view_count'),
+                'swipes' => Swipe::where('user_id', $userId)->count(),
+                'matches' => Matched::where('buyer_id', $userId)->orWhere('seller_id', $userId)->count(),
+            ],
+            'revenue' => [
+                'total' => Product::where('user_id', $userId)->where('status', 'sold')->sum('price'),
+                'pending' => Product::where('user_id', $userId)->where('status', 'reserved')->sum('price'),
+            ],
         ];
     }
 
     /**
-     * Get recent matches with relationships
+     * Get activity data for the last 7 days
      */
-    public function getRecentMatches()
+    public function getRecentActivity(): array
     {
-        $userId = Auth::id();
+        $userId = auth()->id();
+        $days = 7;
+        $startDate = Carbon::now()->subDays($days);
 
-        return Matched::where('buyer_id', $userId)
-            ->orWhere('seller_id', $userId)
-            ->with(['product', 'buyer', 'seller'])
-            ->latest()
+        $dailySwipes = Swipe::where('user_id', $userId)
+            ->where('created_at', '>=', $startDate)
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as count'))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('count', 'date')
+            ->toArray();
+
+        $dailyMatches = Matched::where(function($query) use ($userId) {
+                $query->where('buyer_id', $userId)->orWhere('seller_id', $userId);
+            })
+            ->where('created_at', '>=', $startDate)
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as count'))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('count', 'date')
+            ->toArray();
+
+        return [
+            'swipes' => $dailySwipes,
+            'matches' => $dailyMatches,
+            'period' => $days,
+        ];
+    }
+
+    /**
+     * Get top performing products
+     */
+    public function getTopProducts(): array
+    {
+        $userId = auth()->id();
+
+        return Product::where('user_id', $userId)
+            ->where('status', 'available')
+            ->orderByDesc('view_count')
             ->limit(5)
-            ->get();
-    }
-
-    /**
-     * Calculate conversion metrics
-     */
-    public function getSuccessRate(): int
-    {
-        $stats = $this->getStats();
-        
-        if ($stats['right_swipes'] > 0) {
-            return round(($stats['total_matches'] / $stats['right_swipes']) * 100);
-        }
-        
-        return 0;
-    }
-
-    /**
-     * Calculate engagement metrics
-     */
-    public function getAverageViews(): int
-    {
-        $stats = $this->getStats();
-        
-        if ($stats['total_products'] > 0) {
-            return round($stats['total_views'] / $stats['total_products']);
-        }
-        
-        return 0;
-    }
-
-    /**
-     * Calculate listing health
-     */
-    public function getActiveRate(): int
-    {
-        $stats = $this->getStats();
-        
-        if ($stats['total_products'] > 0) {
-            return round(($stats['active_products'] / $stats['total_products']) * 100);
-        }
-        
-        return 0;
-    }
-
-    /**
-     * Get trend data for the last 7 days
-     */
-    public function getTrendData(): array
-    {
-        $userId = Auth::id();
-        $weekAgo = Carbon::now()->subDays(7);
-
-        $newMatches = Matched::where(function($query) use ($userId) {
-                $query->where('buyer_id', $userId)
-                      ->orWhere('seller_id', $userId);
+            ->get()
+            ->map(function($product) {
+                return [
+                    'id' => $product->id,
+                    'title' => $product->title,
+                    'price' => $product->price,
+                    'views' => $product->view_count,
+                    'likes' => $product->swipes()->where('direction', 'right')->count(),
+                    'image' => $product->images[0] ?? null,
+                ];
             })
-            ->where('created_at', '>=', $weekAgo)
-            ->count();
-
-        $previousWeekMatches = Matched::where(function($query) use ($userId) {
-                $query->where('buyer_id', $userId)
-                      ->orWhere('seller_id', $userId);
-            })
-            ->whereBetween('created_at', [Carbon::now()->subDays(14), $weekAgo])
-            ->count();
-
-        $matchTrend = $previousWeekMatches > 0 
-            ? round((($newMatches - $previousWeekMatches) / $previousWeekMatches) * 100)
-            : ($newMatches > 0 ? 100 : 0);
-
-        return [
-            'matches_this_week' => $newMatches,
-            'match_trend' => $matchTrend,
-        ];
+            ->toArray();
     }
 
     /**
-     * Get performance insights
+     * Get unread messages count
      */
-    public function getInsights(): array
+    public function getUnreadMessagesCount(): int
     {
-        $stats = $this->getStats();
+        $userId = auth()->id();
+
+        return Conversation::whereHas('matched', function ($query) use ($userId) {
+            $query->where('buyer_id', $userId)->orWhere('seller_id', $userId);
+        })
+        ->whereHas('messages', function ($query) use ($userId) {
+            $query->where('user_id', '!=', $userId)->where('is_read', false);
+        })
+        ->count();
+    }
+
+    /**
+     * Get quick actions based on user status
+     */
+    public function getQuickActions(): array
+    {
+        $metrics = $this->getOverviewMetrics();
+        $actions = [];
+
+        if ($metrics['listings']['active'] === 0) {
+            $actions[] = [
+                'title' => 'Create Your First Listing',
+                'description' => 'Start selling by creating your first product',
+                'url' => route('filament.app.resources.products.create'),
+                'icon' => 'heroicon-o-plus-circle',
+                'color' => 'primary',
+            ];
+        }
+
+        if ($metrics['engagement']['matches'] > 0 && $this->getUnreadMessagesCount() > 0) {
+            $actions[] = [
+                'title' => 'You Have Unread Messages',
+                'description' => 'Check your conversations to connect with buyers',
+                'url' => route('filament.app.pages.conversations-page'),
+                'icon' => 'heroicon-o-chat-bubble-left-right',
+                'color' => 'warning',
+            ];
+        }
+
+        if ($metrics['engagement']['swipes'] < 10) {
+            $actions[] = [
+                'title' => 'Start Discovering Products',
+                'description' => 'Swipe through available items in your area',
+                'url' => route('filament.app.pages.swiping-page'),
+                'icon' => 'heroicon-o-hand-raised',
+                'color' => 'success',
+            ];
+        }
+
+        return $actions;
+    }
+
+    /**
+     * Calculate performance insights
+     */
+    public function getPerformanceInsights(): array
+    {
+        $metrics = $this->getOverviewMetrics();
         $insights = [];
 
-        if ($stats['active_products'] === 0) {
-            $insights[] = [
-                'type' => 'warning',
-                'title' => 'No Active Listings',
-                'message' => 'Create your first listing to start connecting with buyers.',
-                'action' => 'Create Listing',
-                'action_url' => route('filament.app.resources.products.create'),
-            ];
+        // Calculate conversion rate
+        if ($metrics['engagement']['swipes'] > 0) {
+            $conversionRate = ($metrics['engagement']['matches'] / $metrics['engagement']['swipes']) * 100;
+            $insights['conversion'] = round($conversionRate, 1);
+        } else {
+            $insights['conversion'] = 0;
         }
 
-        if ($stats['total_matches'] > 0 && $stats['sold_products'] === 0) {
-            $insights[] = [
-                'type' => 'info',
-                'title' => 'Matches Available',
-                'message' => 'You have matches waiting. Start conversations to close deals.',
-                'action' => 'View Matches',
-                'action_url' => route('filament.app.pages.conversations-page'),
-            ];
+        // Calculate average views per listing
+        if ($metrics['listings']['total'] > 0) {
+            $insights['avg_views'] = round($metrics['engagement']['views'] / $metrics['listings']['total']);
+        } else {
+            $insights['avg_views'] = 0;
         }
 
-        $successRate = $this->getSuccessRate();
-        if ($successRate > 50 && $stats['right_swipes'] > 10) {
-            $insights[] = [
-                'type' => 'success',
-                'title' => 'High Performance',
-                'message' => "Your {$successRate}% match rate is excellent. Keep it up!",
-            ];
+        // Calculate sell-through rate
+        if ($metrics['listings']['total'] > 0) {
+            $insights['sell_through'] = round(($metrics['listings']['sold'] / $metrics['listings']['total']) * 100, 1);
+        } else {
+            $insights['sell_through'] = 0;
         }
 
         return $insights;
     }
 
-    /**
-     * Aggregate view data for the template
-     */
     protected function getViewData(): array
     {
         return array_merge(parent::getViewData(), [
-            'stats' => $this->getStats(),
-            'recentMatches' => $this->getRecentMatches(),
-            'successRate' => $this->getSuccessRate(),
-            'averageViews' => $this->getAverageViews(),
-            'activeRate' => $this->getActiveRate(),
-            'trendData' => $this->getTrendData(),
-            'insights' => $this->getInsights(),
+            'overview' => $this->getOverviewMetrics(),
+            'activity' => $this->getRecentActivity(),
+            'topProducts' => $this->getTopProducts(),
+            'unreadMessages' => $this->getUnreadMessagesCount(),
+            'quickActions' => $this->getQuickActions(),
+            'insights' => $this->getPerformanceInsights(),
         ]);
     }
 }

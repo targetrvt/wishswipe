@@ -5,10 +5,12 @@ namespace App\Filament\Pages;
 use Filament\Pages\Page;
 use App\Models\Product;
 use App\Models\Swipe;
+use App\Models\Matched;
 use App\Models\Category;
-use Livewire\Attributes\On;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SwipingPage extends Page
 {
@@ -16,109 +18,44 @@ class SwipingPage extends Page
     
     protected static string $view = 'filament.pages.swiping-page';
     
-    protected static ?string $title = 'Swipe Products';
+    protected static ?string $title = 'Discover';
     
     protected static ?string $navigationLabel = 'Discover';
     
     protected static ?int $navigationSort = 1;
 
-    public $currentProduct = null;
-    public $productsStack = [];
-    public $noMoreProducts = false;
-    public $selectedCategory = null;
-    
-    // Configuration
-    protected int $stackSize = 15;
-    protected int $minStackSize = 5;
+    public ?array $currentProduct = null;
+    public array $productsStack = [];
+    public bool $noMoreProducts = false;
+    public ?int $selectedCategory = null;
+
+    private const STACK_SIZE = 15;
+    private const MIN_STACK_SIZE = 5;
+    private const CACHE_TTL = 3600;
+
 
     public function mount(): void
     {
         $this->loadProducts();
     }
 
-    /**
-     * Load products into the stack
-     */
     public function loadProducts(): void
     {
-        $userId = auth()->id();
-        
-        // Build query for unviewed products
-        $query = Product::query()
-            ->active()
-            ->where('user_id', '!=', $userId)
-            ->whereNotIn('id', function($query) use ($userId) {
-                $query->select('product_id')
-                    ->from('swipes')
-                    ->where('user_id', $userId);
-            })
-            ->with(['category', 'user:id,name'])
-            ->select([
-                'id',
-                'title',
-                'description',
-                'price',
-                'condition',
-                'location',
-                'images',
-                'category_id',
-                'user_id',
-                'created_at'
-            ]);
+        try {
+            $products = $this->fetchProducts(self::STACK_SIZE);
 
-        // Apply category filter if selected
-        if ($this->selectedCategory) {
-            $query->where('category_id', $this->selectedCategory);
+            if ($products->isEmpty()) {
+                $this->setEmptyState();
+                return;
+            }
+
+            $this->populateStack($products);
+        } catch (\Exception $e) {
+            $this->handleError('Failed to load products', $e);
+            $this->setEmptyState();
         }
-
-        // Get products in random order
-        $products = $query
-            ->inRandomOrder()
-            ->limit($this->stackSize)
-            ->get();
-
-        // Handle empty results
-        if ($products->isEmpty()) {
-            $this->noMoreProducts = true;
-            $this->currentProduct = null;
-            $this->productsStack = [];
-            return;
-        }
-
-        // Convert to array and prepare stack
-        $productsArray = $products->map(function ($product) {
-            return [
-                'id' => $product->id,
-                'title' => $product->title,
-                'description' => $product->description,
-                'price' => $product->price,
-                'condition' => $product->condition,
-                'location' => $product->location,
-                'images' => is_array($product->images) ? $product->images : json_decode($product->images, true),
-                'category' => [
-                    'id' => $product->category?->id,
-                    'name' => $product->category?->name ?? 'Uncategorized',
-                ],
-                'user' => [
-                    'id' => $product->user?->id,
-                    'name' => $product->user?->name ?? 'Unknown',
-                ],
-                'created_at' => $product->created_at?->diffForHumans(),
-            ];
-        })->toArray();
-
-        // Set current product and stack
-        if (empty($this->currentProduct) && !empty($productsArray)) {
-            $this->currentProduct = array_shift($productsArray);
-        }
-        
-        $this->productsStack = $productsArray;
-        $this->noMoreProducts = false;
     }
 
-    /**
-     * Handle left swipe (pass/reject)
-     */
     public function swipeLeft(): void
     {
         if (!$this->currentProduct) {
@@ -126,24 +63,14 @@ class SwipingPage extends Page
         }
 
         try {
-            // Record the swipe
-            Swipe::create([
-                'user_id' => auth()->id(),
-                'product_id' => $this->currentProduct['id'],
-                'direction' => 'left',
-            ]);
-
-            $this->nextProduct();
+            $this->recordSwipe('left');
+            $this->moveToNextProduct();
         } catch (\Exception $e) {
-            // Log error but continue
-            logger()->error('Swipe left error: ' . $e->getMessage());
-            $this->nextProduct();
+            $this->handleError('Swipe left failed', $e);
+            $this->moveToNextProduct();
         }
     }
 
-    /**
-     * Handle right swipe (like/accept)
-     */
     public function swipeRight(): void
     {
         if (!$this->currentProduct) {
@@ -153,189 +80,266 @@ class SwipingPage extends Page
         try {
             DB::beginTransaction();
 
-            // Record the swipe
-            $swipe = Swipe::create([
-                'user_id' => auth()->id(),
-                'product_id' => $this->currentProduct['id'],
-                'direction' => 'right',
-            ]);
-
-            // Check for match and create if exists
+            $this->recordSwipe('right');
+            
             $product = Product::find($this->currentProduct['id']);
             
-            if ($product) {
-                $matchCreated = $this->checkAndCreateMatch($product);
-                
-                if ($matchCreated) {
-                    $this->dispatch('show-match-notification');
-                }
+            if ($product && $this->createMatchIfMutual($product)) {
+                $this->notifyMatch();
             }
 
             DB::commit();
-            $this->nextProduct();
+            $this->moveToNextProduct();
         } catch (\Exception $e) {
             DB::rollBack();
-            logger()->error('Swipe right error: ' . $e->getMessage());
-            $this->nextProduct();
+            $this->handleError('Swipe right failed', $e);
+            $this->moveToNextProduct();
         }
     }
 
-    /**
-     * Check if both users liked each other's products and create match
-     */
-    protected function checkAndCreateMatch(Product $product): bool
+    public function updatedSelectedCategory(): void
     {
-        $currentUserId = auth()->id();
-        $productOwnerId = $product->user_id;
-
-        // Check if the product owner also swiped right on any of current user's products
-        $mutualLike = Swipe::where('user_id', $productOwnerId)
-            ->where('direction', 'right')
-            ->whereHas('product', function($query) use ($currentUserId) {
-                $query->where('user_id', $currentUserId);
-            })
-            ->exists();
-
-        if ($mutualLike) {
-            // Create match (implement your match creation logic)
-            // This could be a separate Match model or notification
-            
-            // Example: Create conversation or send notification
-            // Match::firstOrCreate([
-            //     'user_id_1' => min($currentUserId, $productOwnerId),
-            //     'user_id_2' => max($currentUserId, $productOwnerId),
-            // ]);
-            
-            return true;
-        }
-
-        return false;
+        $this->resetState();
+        $this->loadProducts();
     }
 
-    /**
-     * Move to the next product
-     */
-    protected function nextProduct(): void
+    public function resetFilters(): void
     {
-        // Check if we need to load more products
-        if (count($this->productsStack) < $this->minStackSize) {
-            $this->loadMoreProducts();
-        }
-
-        // Get next product from stack
-        if (!empty($this->productsStack)) {
-            $this->currentProduct = array_shift($this->productsStack);
-        } else {
-            $this->noMoreProducts = true;
-            $this->currentProduct = null;
-        }
+        $this->selectedCategory = null;
+        $this->resetState();
+        $this->loadProducts();
     }
 
-    /**
-     * Load additional products to refill the stack
-     */
-    protected function loadMoreProducts(): void
+    public function getCategoriesProperty()
+    {
+        return Cache::remember(
+            'active_categories',
+            self::CACHE_TTL,
+            fn() => Category::where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'name', 'icon'])
+        );
+    }
+
+    // Private Helper Methods !!!
+
+    private function fetchProducts(int $limit): \Illuminate\Database\Eloquent\Collection
     {
         $userId = auth()->id();
         
-        // Get IDs of products already in stack or current
-        $excludeIds = collect($this->productsStack)
+        return Product::query()
+            ->active()
+            ->where('user_id', '!=', $userId)
+            ->whereNotIn('id', $this->getSwipedProductIds($userId))
+            ->when($this->selectedCategory, fn($q) => $q->where('category_id', $this->selectedCategory))
+            ->with(['category:id,name,icon', 'user:id,name'])
+            ->select([
+                'id', 'title', 'description', 'price', 
+                'condition', 'location', 'images', 
+                'category_id', 'user_id', 'created_at'
+            ])
+            ->inRandomOrder()
+            ->limit($limit)
+            ->get();
+    }
+
+    private function getSwipedProductIds(int $userId): \Illuminate\Database\Eloquent\Builder
+    {
+        return Swipe::query()
+            ->where('user_id', $userId)
+            ->select('product_id');
+    }
+
+    private function populateStack(\Illuminate\Database\Eloquent\Collection $products): void
+    {
+        $productsArray = $products->map(fn($product) => $this->formatProduct($product))->toArray();
+
+        if (empty($this->currentProduct) && !empty($productsArray)) {
+            $this->currentProduct = array_shift($productsArray);
+        }
+        
+        $this->productsStack = $productsArray;
+        $this->noMoreProducts = false;
+    }
+
+    private function formatProduct(Product $product): array
+    {
+        return [
+            'id' => $product->id,
+            'title' => $product->title,
+            'description' => $product->description,
+            'price' => $product->price,
+            'condition' => $product->condition,
+            'location' => $product->location,
+            'images' => $this->normalizeImages($product->images),
+            'category' => [
+                'id' => $product->category?->id,
+                'name' => $product->category?->name ?? 'Uncategorized',
+                'icon' => $product->category?->icon,
+            ],
+            'user' => [
+                'id' => $product->user?->id,
+                'name' => $product->user?->name ?? 'Unknown',
+            ],
+            'created_at' => $product->created_at?->diffForHumans(),
+        ];
+    }
+
+    private function normalizeImages($images): array
+    {
+        if (is_array($images)) {
+            return $images;
+        }
+        
+        if (is_string($images)) {
+            $decoded = json_decode($images, true);
+            return is_array($decoded) ? $decoded : [];
+        }
+        
+        return [];
+    }
+
+    private function recordSwipe(string $direction): void
+    {
+        Swipe::create([
+            'user_id' => auth()->id(),
+            'product_id' => $this->currentProduct['id'],
+            'direction' => $direction,
+        ]);
+    }
+
+    private function createMatchIfMutual(Product $product): bool
+    {
+        $currentUserId = auth()->id();
+        $sellerId = $product->user_id;
+
+        $mutualLike = $this->checkMutualLike($sellerId, $currentUserId);
+
+        if (!$mutualLike) {
+            return false;
+        }
+
+        $match = Matched::firstOrCreate(
+            [
+                'buyer_id' => $currentUserId,
+                'seller_id' => $sellerId,
+                'product_id' => $product->id,
+            ],
+            [
+                'is_active' => true,
+            ]
+        );
+
+        $this->clearMatchCaches($currentUserId, $sellerId);
+
+        return $match->wasRecentlyCreated;
+    }
+
+    private function checkMutualLike(int $sellerId, int $buyerId): bool
+    {
+        return Swipe::where('user_id', $sellerId)
+            ->where('direction', 'right')
+            ->whereHas('product', fn($query) => $query->where('user_id', $buyerId))
+            ->exists();
+    }
+
+    private function clearMatchCaches(int $userId1, int $userId2): void
+    {
+        Cache::forget("user_matches_{$userId1}");
+        Cache::forget("user_matches_{$userId2}");
+        Cache::forget("user_conversations_{$userId1}");
+        Cache::forget("user_conversations_{$userId2}");
+    }
+
+    private function moveToNextProduct(): void
+    {
+        if (count($this->productsStack) < self::MIN_STACK_SIZE) {
+            $this->refillStack();
+        }
+
+        if (!empty($this->productsStack)) {
+            $this->currentProduct = array_shift($this->productsStack);
+        } else {
+            $this->setEmptyState();
+        }
+    }
+
+    private function refillStack(): void
+    {
+        try {
+            $excludeIds = $this->getExcludedProductIds();
+            
+            $products = Product::query()
+                ->active()
+                ->where('user_id', '!=', auth()->id())
+                ->whereNotIn('id', $excludeIds)
+                ->whereNotIn('id', $this->getSwipedProductIds(auth()->id()))
+                ->when($this->selectedCategory, fn($q) => $q->where('category_id', $this->selectedCategory))
+                ->with(['category:id,name,icon', 'user:id,name'])
+                ->select([
+                    'id', 'title', 'description', 'price',
+                    'condition', 'location', 'images',
+                    'category_id', 'user_id', 'created_at'
+                ])
+                ->inRandomOrder()
+                ->limit(self::STACK_SIZE)
+                ->get();
+
+            $newProducts = $products->map(fn($product) => $this->formatProduct($product))->toArray();
+            
+            $this->productsStack = array_merge($this->productsStack, $newProducts);
+        } catch (\Exception $e) {
+            $this->handleError('Failed to refill stack', $e);
+        }
+    }
+
+    private function getExcludedProductIds(): array
+    {
+        return collect($this->productsStack)
             ->pluck('id')
             ->push($this->currentProduct['id'] ?? null)
             ->filter()
             ->toArray();
-
-        // Load more products
-        $products = Product::query()
-            ->active()
-            ->where('user_id', '!=', $userId)
-            ->whereNotIn('id', $excludeIds)
-            ->whereNotIn('id', function($query) use ($userId) {
-                $query->select('product_id')
-                    ->from('swipes')
-                    ->where('user_id', $userId);
-            })
-            ->when($this->selectedCategory, function($query) {
-                $query->where('category_id', $this->selectedCategory);
-            })
-            ->with(['category', 'user:id,name'])
-            ->select([
-                'id',
-                'title',
-                'description',
-                'price',
-                'condition',
-                'location',
-                'images',
-                'category_id',
-                'user_id',
-                'created_at'
-            ])
-            ->inRandomOrder()
-            ->limit($this->stackSize)
-            ->get();
-
-        // Add to stack
-        $newProducts = $products->map(function ($product) {
-            return [
-                'id' => $product->id,
-                'title' => $product->title,
-                'description' => $product->description,
-                'price' => $product->price,
-                'condition' => $product->condition,
-                'location' => $product->location,
-                'images' => is_array($product->images) ? $product->images : json_decode($product->images, true),
-                'category' => [
-                    'id' => $product->category?->id,
-                    'name' => $product->category?->name ?? 'Uncategorized',
-                ],
-                'user' => [
-                    'id' => $product->user?->id,
-                    'name' => $product->user?->name ?? 'Unknown',
-                ],
-                'created_at' => $product->created_at?->diffForHumans(),
-            ];
-        })->toArray();
-
-        $this->productsStack = array_merge($this->productsStack, $newProducts);
     }
 
-    /**
-     * Handle category filter change
-     */
-    public function updatedSelectedCategory(): void
+    private function setEmptyState(): void
     {
-        // Clear current state
+        $this->noMoreProducts = true;
+        $this->currentProduct = null;
+        $this->productsStack = [];
+    }
+
+    private function resetState(): void
+    {
         $this->productsStack = [];
         $this->currentProduct = null;
         $this->noMoreProducts = false;
-        
-        // Load products with new filter
-        $this->loadProducts();
     }
 
-    /**
-     * Reset all filters
-     */
-    public function resetFilters(): void
+    private function notifyMatch(): void
     {
-        $this->selectedCategory = null;
-        $this->productsStack = [];
-        $this->currentProduct = null;
-        $this->noMoreProducts = false;
+        $this->dispatch('show-match-notification');
         
-        $this->loadProducts();
+        Notification::make()
+            ->success()
+            ->title('It\'s a Match! 💫')
+            ->body('You can now message each other')
+            ->duration(5000)
+            ->send();
     }
 
-    /**
-     * Get the categories for the filter dropdown
-     */
-    public function getCategoriesProperty()
+    private function handleError(string $message, \Exception $e): void
     {
-        return Cache::remember('active_categories', 3600, function () {
-            return Category::where('is_active', true)
-                ->orderBy('name')
-                ->get(['id', 'name']);
-        });
+        Log::error($message, [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'user_id' => auth()->id(),
+        ]);
+
+        Notification::make()
+            ->warning()
+            ->title('Oops!')
+            ->body('Something went wrong. Please try again.')
+            ->send();
     }
 }

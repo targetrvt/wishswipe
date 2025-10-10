@@ -1,13 +1,31 @@
 <x-filament-panels::page>
     <style>
+        .filter-filament-container {
+            max-width: 500px;
+            margin: -2rem auto 1rem;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 50;
+        }
+
+        .filter-filament-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .filter-filament-wrapper > div:first-child {
+            flex: 1;
+        }
+
         .swipe-container {
             perspective: 1500px;
             position: relative;
             width: 100%;
             max-width: 500px;
             height: 600px;
-            margin: 0 auto;
-            margin-top: -5rem;
+            margin: -3rem auto 0;
+            z-index: 1;
         }
 
         .card-stack {
@@ -159,7 +177,9 @@
             display: flex;
             justify-content: center;
             gap: 2rem;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
+            position: relative;
+            z-index: 20;
         }
 
         .action-btn {
@@ -262,33 +282,6 @@
             max-width: 400px;
         }
 
-        .filter-container {
-            max-width: 500px;
-            margin: 0 auto 1rem;
-        }
-
-        .filter-select {
-            width: 100%;
-            padding: 0.875rem 1.25rem;
-            border-radius: 16px;
-            border: 2px solid #e5e7eb;
-            font-size: 1rem;
-            font-weight: 600;
-            background: white;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .filter-select:hover {
-            border-color: #667eea;
-        }
-
-        .filter-select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
         .loading-state {
             display: flex;
             flex-direction: column;
@@ -356,11 +349,33 @@
             color: rgba(255, 255, 255, 0.9);
         }
 
+        .keyboard-hint {
+            text-align: center;
+            margin-top: 1rem;
+            color: #9ca3af;
+            font-size: 0.875rem;
+            position: relative;
+            z-index: 20;
+        }
+
+        .keyboard-hint kbd {
+            padding: 0.25rem 0.5rem;
+            background: #f3f4f6;
+            border-radius: 6px;
+            font-family: monospace;
+            margin: 0 0.25rem;
+        }
+
         @media (max-width: 640px) {
+            .filter-filament-container {
+                padding: 0 0.5rem;
+                margin: -1rem auto 0.5rem;
+            }
+
             .swipe-container {
                 max-width: 100%;
                 height: 500px;
-                margin-top: -1rem;
+                margin: -1rem auto 0;
             }
 
             .swipe-card {
@@ -390,7 +405,20 @@
             }
 
             .action-buttons {
-                margin-top: 0.75rem;
+                margin-top: 1rem;
+            }
+
+            .filter-filament-wrapper {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .filter-filament-wrapper > div:first-child {
+                width: 100%;
+            }
+
+            .keyboard-hint {
+                display: none;
             }
         }
 
@@ -403,25 +431,40 @@
                 color: #f9fafb;
             }
 
-            .filter-select {
-                background: #1f2937;
-                border-color: #374151;
+            .empty-state-title {
                 color: #f9fafb;
             }
 
-            .empty-state-title {
-                color: #f9fafb;
+            .keyboard-hint kbd {
+                background: #374151;
+                color: #9ca3af;
             }
         }
     </style>
 
-    <div class="filter-container">
-        <select wire:model.live="selectedCategory" class="filter-select">
-            <option value="">🎯 All Categories</option>
-            @foreach(\App\Models\Category::where('is_active', true)->get() as $category)
-                <option value="{{ $category->id }}">{{ $category->icon }} {{ $category->name }}</option>
-            @endforeach
-        </select>
+
+    <div class="filter-filament-container">
+        <div class="filter-filament-wrapper">
+            <x-filament::input.wrapper>
+                <x-filament::input.select wire:model.live="selectedCategory">
+                    <option value="">All Categories</option>
+                    @foreach(\App\Models\Category::where('is_active', true)->orderBy('name')->get() as $category)
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    @endforeach
+                </x-filament::input.select>
+            </x-filament::input.wrapper>
+            
+            @if($selectedCategory)
+                <x-filament::button
+                    wire:click="resetFilters"
+                    color="gray"
+                    size="md"
+                    icon="heroicon-o-x-mark"
+                    tooltip="Clear filter">
+                    Clear
+                </x-filament::button>
+            @endif
+        </div>
     </div>
 
     <div class="swipe-container" x-data="swipeHandler()">
@@ -536,10 +579,10 @@
                 </button>
             </div>
 
-            <div style="text-align: center; margin-top: 1rem; color: #9ca3af; font-size: 0.875rem;">
-                <kbd style="padding: 0.25rem 0.5rem; background: #f3f4f6; border-radius: 6px; font-family: monospace; margin: 0 0.25rem;">←</kbd>
+            <div class="keyboard-hint">
+                <kbd>←</kbd>
                 Pass  •
-                <kbd style="padding: 0.25rem 0.5rem; background: #f3f4f6; border-radius: 6px; font-family: monospace; margin: 0 0.25rem;">→</kbd>
+                <kbd>→</kbd>
                 Like
             </div>
         @else

@@ -491,7 +491,7 @@
         @elseif($currentProduct)
             <div class="card-stack" id="cardStack">
                 <div class="swipe-indicator left" id="nopeIndicator">✕</div>
-                <div class="swipe-indicator right" id="likeIndicator">♥</div>
+                <div class="swipe-indicator right" id="likeIndicator">🛒</div>
 
                 <div class="swipe-card" id="currentCard">
                     @php
@@ -573,8 +573,8 @@
                     @click="swipeCard('right')" 
                     class="action-btn like"
                     wire:loading.attr="disabled">
-                    <svg fill="currentColor" viewBox="0 0 20 20" style="width: 32px; height: 32px;">
-                        <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 32px; height: 32px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                 </button>
             </div>
@@ -583,7 +583,7 @@
                 <kbd>←</kbd>
                 Pass  •
                 <kbd>→</kbd>
-                Like
+                Add to Cart
             </div>
         @else
             <div class="loading-state">
@@ -599,11 +599,11 @@
         x-data="{ show: false }"
         :class="{ 'show': show }"
         @show-match.window="show = true; setTimeout(() => show = false, 3000)">
-        <svg class="match-notification-icon" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+        <svg class="match-notification-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
-        <h3 class="match-notification-title">It's a Match! 💫</h3>
-        <p class="match-notification-text">You can now message each other</p>
+        <h3 class="match-notification-title">Added to Cart! 🛒</h3>
+        <p class="match-notification-text">Product has been added to your cart</p>
     </div>
 
     @script

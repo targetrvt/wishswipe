@@ -105,7 +105,14 @@ class MyListings extends Page implements HasForms, HasTable
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\Action::make('view')
+                        ->label('View')
+                        ->icon('heroicon-o-eye')
+                        ->color('info')
+                        ->modalHeading(fn ($record) => $record->title)
+                        ->modalContent(fn ($record) => view('filament.pages.view-product-modal', ['record' => $record]))
+                        ->modalWidth('5xl')
+                        ->slideOver(),
                     Tables\Actions\EditAction::make()
                         ->form([
                             Forms\Components\TextInput::make('title')

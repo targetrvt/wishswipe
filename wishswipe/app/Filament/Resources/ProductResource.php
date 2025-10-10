@@ -12,6 +12,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Notification;
+use Cheesegrits\FilamentGoogleMaps\Fields\Map;
+use Cheesegrits\FilamentGoogleMaps\Fields\Geocomplete;
 
 class ProductResource extends Resource
 {
@@ -47,9 +49,11 @@ class ProductResource extends Resource
                             ->helperText('Be specific about condition, features, and any defects'),
                         
                         Forms\Components\Select::make('category_id')
-                                ->label('Category')
-                                ->options(fn () => Category::where('is_active', true)->pluck('name', 'id'))
-                                ->required(),
+                            ->label('Category')
+                            ->options(fn () => Category::where('is_active', true)->pluck('name', 'id'))
+                            ->required()
+                            ->searchable()
+                            ->preload(),
                         
                         Forms\Components\TextInput::make('price')
                             ->required()
@@ -86,23 +90,92 @@ class ProductResource extends Resource
                     ->description('Help buyers find products near them')
                     ->schema([
                         Forms\Components\TextInput::make('location')
-                            ->maxLength(255)
-                            ->placeholder('City, State or ZIP code')
+                            ->label('Location Address')
+                            ->placeholder('e.g., Riga, Latvia or Brīvības iela 1, Rīga')
+                            ->columnSpanFull()
+                            ->helperText('Enter the full address where the product is located'),
+                        
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('latitude')
+                                    ->label('Latitude')
+                                    ->numeric()
+                                    ->step(0.0000001)
+                                    ->default(56.9496)
+                                    ->required()
+                                    ->live()
+                                    ->helperText('Will be used for nearby search'),
+                                
+                                Forms\Components\TextInput::make('longitude')
+                                    ->label('Longitude')
+                                    ->numeric()
+                                    ->step(0.0000001)
+                                    ->default(24.1052)
+                                    ->required()
+                                    ->live()
+                                    ->helperText('Will be used for nearby search'),
+                            ]),
+                        
+                        // Map component - should now be visible since API key is configured
+                        Map::make('computed_location')
+                            ->label('Interactive Map (Drag marker to set location)')
+                            ->mapControls([
+                                'mapTypeControl' => true,
+                                'scaleControl' => true,
+                                'streetViewControl' => true,
+                                'zoomControl' => true,
+                            ])
+                            ->height('400px')
+                            ->defaultZoom(15)
+                            ->draggable(true)
+                            ->clickable(true)
+                            ->columnSpanFull()
+                            ->afterStateHydrated(function ($state, $record, $set, $get) {
+                                if ($record && $record->latitude && $record->longitude) {
+                                    $set('computed_location', [
+                                        'lat' => (float) $record->latitude,
+                                        'lng' => (float) $record->longitude,
+                                    ]);
+                                } else {
+                                    $lat = $get('latitude') ?? 56.9496;
+                                    $lng = $get('longitude') ?? 24.1052;
+                                    $set('computed_location', [
+                                        'lat' => (float) $lat,
+                                        'lng' => (float) $lng,
+                                    ]);
+                                }
+                            })
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                if (is_array($state) && isset($state['lat'], $state['lng'])) {
+                                    $set('latitude', $state['lat']);
+                                    $set('longitude', $state['lng']);
+                                }
+                            })
+                            ->live()
+                            ->dehydrated(false),
+                            // Removed ->visible() to force it to show
+                        
+                        Forms\Components\Placeholder::make('map_link')
+                            ->label('View on Map')
+                            ->content(function ($record, $get) {
+                                $lat = $get('latitude') ?? $record?->latitude ?? 56.9496;
+                                $lng = $get('longitude') ?? $record?->longitude ?? 24.1052;
+                                return new \Illuminate\Support\HtmlString(
+                                    '<a href="https://www.google.com/maps/search/?api=1&query=' . $lat . ',' . $lng . '" 
+                                        target="_blank" 
+                                        class="text-primary-600 hover:text-primary-700 underline flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                        Open in Google Maps →
+                                    </a>
+                                    <p class="text-xs text-gray-500 mt-1">Click to verify the location on Google Maps</p>'
+                                );
+                            })
                             ->columnSpanFull(),
-                        
-                        Forms\Components\TextInput::make('latitude')
-                            ->numeric()
-                            ->step(0.0000001)
-                            ->placeholder('e.g., 40.7128')
-                            ->helperText('Optional: GPS coordinates'),
-                        
-                        Forms\Components\TextInput::make('longitude')
-                            ->numeric()
-                            ->step(0.0000001)
-                            ->placeholder('e.g., -74.0060')
-                            ->helperText('Optional: GPS coordinates'),
                     ])
-                    ->columns(3)
+                    ->columns(1)
                     ->collapsible(),
                 
                 Forms\Components\Section::make('Product Images')
@@ -164,7 +237,13 @@ class ProductResource extends Resource
                     ->stacked()
                     ->limit(1)
                     ->defaultImageUrl(url('/images/placeholder.jpg'))
-                    ->getStateUsing(fn ($record) => $record->images[0] ?? null),
+                    ->getStateUsing(function ($record) {
+                        if (!$record->images) {
+                            return null;
+                        }
+                        $images = is_string($record->images) ? json_decode($record->images, true) : $record->images;
+                        return is_array($images) && count($images) > 0 ? $images[0] : null;
+                    }),
                 
                 Tables\Columns\TextColumn::make('title')
                     ->searchable()
@@ -185,7 +264,7 @@ class ProductResource extends Resource
                         'info' => 'like_new',
                         'warning' => 'used',
                     ])
-                    ->formatStateUsing(fn ($state) => ucfirst(str_replace('_', ' ', $state))),
+                    ->formatStateUsing(fn ($state) => $state ? ucfirst(str_replace('_', ' ', $state)) : 'N/A'),
                 
                 Tables\Columns\BadgeColumn::make('status')
                     ->colors([
@@ -193,7 +272,7 @@ class ProductResource extends Resource
                         'warning' => 'reserved',
                         'danger' => 'sold',
                     ])
-                    ->formatStateUsing(fn ($state) => ucfirst($state)),
+                    ->formatStateUsing(fn ($state) => $state ? ucfirst($state) : 'N/A'),
                 
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean()
@@ -204,7 +283,14 @@ class ProductResource extends Resource
                     ->label('Views')
                     ->sortable()
                     ->alignCenter()
-                    ->icon('heroicon-m-eye'),
+                    ->icon('heroicon-m-eye')
+                    ->default(0),
+                
+                Tables\Columns\TextColumn::make('location')
+                    ->searchable()
+                    ->limit(30)
+                    ->toggleable()
+                    ->formatStateUsing(fn ($state) => $state ?: 'N/A'),
                 
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -248,6 +334,14 @@ class ProductResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
+                    
+                    Tables\Actions\Action::make('view_map')
+                        ->label('View on Map')
+                        ->icon('heroicon-o-map-pin')
+                        ->color('info')
+                        ->visible(fn ($record) => $record->latitude && $record->longitude)
+                        ->url(fn ($record) => "https://www.google.com/maps/search/?api=1&query={$record->latitude},{$record->longitude}")
+                        ->openUrlInNewTab(),
                     
                     Tables\Actions\Action::make('mark_sold')
                         ->label('Mark as Sold')
@@ -375,11 +469,5 @@ class ProductResource extends Resource
     public static function getNavigationBadgeColor(): ?string
     {
         return 'success';
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        // Hide from navigation for regular users - they should use "My Listings" page instead
-        return auth()->user()->hasRole('super_admin');
     }
 }

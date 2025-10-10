@@ -27,13 +27,29 @@ class Product extends Model
         'view_count',
     ];
 
+    protected $appends = ['computed_location'];
+
     protected $casts = [
         'images' => 'array',
         'price' => 'decimal:2',
         'latitude' => 'decimal:7',
         'longitude' => 'decimal:7',
         'is_active' => 'boolean',
+        'view_count' => 'integer',
     ];
+
+    // IMPORTANT: Add this accessor for the Google Maps component
+    // This creates a virtual "computed_location" attribute
+    public function getComputedLocationAttribute(): array
+    {
+        $latitude = $this->latitude ?? 56.9496;
+        $longitude = $this->longitude ?? 24.1052;
+        
+        return [
+            'lat' => (float) $latitude,
+            'lng' => (float) $longitude,
+        ];
+    }
 
     public function user(): BelongsTo
     {
@@ -75,7 +91,7 @@ class Product extends Model
         return $query->where('is_active', true)->where('status', 'available');
     }
 
-    public function scopeNearby($query, $lat, $lng, $radius = 50) //velak uztaisit labaku
+    public function scopeNearby($query, $lat, $lng, $radius = 50)
     {
         return $query->whereNotNull('latitude') 
             ->whereNotNull('longitude')

@@ -12,6 +12,8 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Tables\Concerns\InteractsWithTable;
 use App\Models\Product;
 use App\Models\Category;
+use Cheesegrits\FilamentGoogleMaps\Fields\Map;
+use Cheesegrits\FilamentGoogleMaps\Fields\Geocomplete;
 
 class MyListings extends Page implements HasForms, HasTable
 {
@@ -113,6 +115,15 @@ class MyListings extends Page implements HasForms, HasTable
                         ->modalContent(fn ($record) => view('filament.pages.view-product-modal', ['record' => $record]))
                         ->modalWidth('5xl')
                         ->slideOver(),
+                    
+                    Tables\Actions\Action::make('view_map')
+                        ->label('View on Map')
+                        ->icon('heroicon-o-map-pin')
+                        ->color('info')
+                        ->visible(fn ($record) => $record->latitude && $record->longitude)
+                        ->url(fn ($record) => "https://www.google.com/maps/search/?api=1&query={$record->latitude},{$record->longitude}")
+                        ->openUrlInNewTab(),
+                    
                     Tables\Actions\EditAction::make()
                         ->form([
                             Forms\Components\TextInput::make('title')
@@ -126,7 +137,8 @@ class MyListings extends Page implements HasForms, HasTable
                             Forms\Components\Select::make('category_id')
                                 ->label('Category')
                                 ->options(fn () => Category::where('is_active', true)->pluck('name', 'id'))
-                                ->required(),         
+                                ->required()
+                                ->searchable(),
                             
                             Forms\Components\TextInput::make('price')
                                 ->required()
@@ -149,6 +161,37 @@ class MyListings extends Page implements HasForms, HasTable
                                 ])
                                 ->required(),
                             
+                            Geocomplete::make('location')
+                                ->isLocation()
+                                ->reverseGeocode([
+                                    'city' => '%L',
+                                    'zip' => '%z',
+                                    'state' => '%A1',
+                                    'country' => '%c',
+                                ])
+                                ->countries(['us', 'gb', 'lv'])
+                                ->placeholder('Search for a location...')
+                                ->columnSpanFull(),
+                            
+                            Map::make('location')
+                                ->mapControls([
+                                    'mapTypeControl' => true,
+                                    'scaleControl' => true,
+                                    'streetViewControl' => true,
+                                    'rotateControl' => true,
+                                    'fullscreenControl' => true,
+                                    'searchBoxControl' => false,
+                                    'zoomControl' => true,
+                                ])
+                                ->height(fn () => '300px')
+                                ->defaultZoom(15)
+                                ->autocomplete('location')
+                                ->autocompleteReverse(true)
+                                ->defaultLocation([56.9496, 24.1052])
+                                ->draggable()
+                                ->clickable(true)
+                                ->columnSpanFull(),
+                            
                             Forms\Components\FileUpload::make('images')
                                 ->multiple()
                                 ->image()
@@ -157,7 +200,8 @@ class MyListings extends Page implements HasForms, HasTable
                             
                             Forms\Components\Toggle::make('is_active')
                                 ->label('Active'),
-                        ]),
+                        ])
+                        ->modalWidth('5xl'),
                     
                     Tables\Actions\Action::make('mark_sold')
                         ->label('Mark as Sold')

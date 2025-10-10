@@ -92,17 +92,18 @@
 
         .card-image {
             width: 100%;
-            height: 70%;
+            height: 55%;
             object-fit: cover;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .card-content {
             padding: 1.5rem;
-            height: 30%;
+            height: 45%;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            overflow-y: auto;
         }
 
         .card-title {
@@ -114,6 +115,17 @@
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+        }
+
+        .card-description {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.5;
         }
 
         .card-info {
@@ -386,6 +398,11 @@
                 font-size: 1.25rem;
             }
 
+            .card-description {
+                font-size: 0.8rem;
+                -webkit-line-clamp: 2;
+            }
+
             .card-price {
                 font-size: 1.5rem;
             }
@@ -429,6 +446,10 @@
 
             .card-title {
                 color: #f9fafb;
+            }
+
+            .card-description {
+                color: #9ca3af;
             }
 
             .empty-state-title {
@@ -528,6 +549,11 @@
                     <div class="card-content">
                         <div>
                             <h3 class="card-title">{{ $currentProduct['title'] }}</h3>
+                            
+                            @if($currentProduct['description'])
+                                <p class="card-description">{{ $currentProduct['description'] }}</p>
+                            @endif
+                            
                             <div class="card-info">
                                 <span class="card-price">${{ number_format($currentProduct['price'], 2) }}</span>
                                 @if($currentProduct['location'])

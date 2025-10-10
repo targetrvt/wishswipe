@@ -44,7 +44,6 @@ class Matched extends Model
         parent::boot();
 
         static::created(function ($matched) {
-            // Automatically create a conversation when a matched
             Conversation::create([
                 'matched_id' => $matched->id,
                 'product_id' => $matched->product_id,

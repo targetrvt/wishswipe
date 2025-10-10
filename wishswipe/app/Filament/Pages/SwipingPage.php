@@ -208,17 +208,10 @@ class SwipingPage extends Page
         ]);
     }
 
-    private function createMatchIfMutual(Product $product): bool
+        private function createMatchIfMutual(Product $product): bool
     {
         $currentUserId = auth()->id();
         $sellerId = $product->user_id;
-
-        $mutualLike = $this->checkMutualLike($sellerId, $currentUserId);
-
-        if (!$mutualLike) {
-            return false;
-        }
-
         $match = Matched::firstOrCreate(
             [
                 'buyer_id' => $currentUserId,
@@ -233,14 +226,6 @@ class SwipingPage extends Page
         $this->clearMatchCaches($currentUserId, $sellerId);
 
         return $match->wasRecentlyCreated;
-    }
-
-    private function checkMutualLike(int $sellerId, int $buyerId): bool
-    {
-        return Swipe::where('user_id', $sellerId)
-            ->where('direction', 'right')
-            ->whereHas('product', fn($query) => $query->where('user_id', $buyerId))
-            ->exists();
     }
 
     private function clearMatchCaches(int $userId1, int $userId2): void

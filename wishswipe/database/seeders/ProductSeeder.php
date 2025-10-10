@@ -11,7 +11,8 @@ class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        $users = User::all();
+        // Get all users EXCEPT the admin user
+        $users = User::where('email', '!=', 'admin@admin.com')->get();
         $categories = Category::all();
 
         if ($users->isEmpty() || $categories->isEmpty()) {
@@ -199,10 +200,12 @@ class ProductSeeder extends Seeder
                 'location' => $productData['location'],
                 'is_active' => true,
                 'view_count' => rand(0, 100),
-                'images' => [], // You can add sample images here if needed
+                'images' => [],
             ]);
         }
 
-        $this->command->info('Products seeded successfully!');
+        $this->command->info('Products seeded successfully! (Admin account excluded)');
+        $this->command->info('Total products created: ' . count($products));
+        $this->command->info('Products assigned to ' . $users->count() . ' non-admin user(s)');
     }
 }

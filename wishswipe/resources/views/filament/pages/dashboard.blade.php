@@ -2,10 +2,10 @@
     {{-- Welcome Header --}}
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-            Welcome back, {{ auth()->user()->name }}
+            {{ __('dashboard.welcome_back', ['name' => auth()->user()->name]) }}
         </h1>
         <p class="mt-2 text-gray-600 dark:text-gray-400">
-            Here's what's happening with your marketplace today
+            {{ __('dashboard.welcome_subtitle') }}
         </p>
     </div>
 
@@ -38,14 +38,14 @@
                 <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                     <x-heroicon-o-shopping-bag class="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
-                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">ACTIVE</span>
+                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('dashboard.metrics.active') }}</span>
             </div>
             <div class="space-y-1">
                 <div class="text-3xl font-bold text-gray-900 dark:text-white">
                     {{ $overview['listings']['active'] }}
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
-                    of {{ $overview['listings']['total'] }} total listings
+                    {{ __('dashboard.metrics.of_total_listings', ['total' => $overview['listings']['total']]) }}
                 </p>
             </div>
         </div>
@@ -56,14 +56,14 @@
                 <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
                     <x-heroicon-o-eye class="w-6 h-6 text-purple-600 dark:text-purple-400" />
                 </div>
-                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">VIEWS</span>
+                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('dashboard.metrics.views') }}</span>
             </div>
             <div class="space-y-1">
                 <div class="text-3xl font-bold text-gray-900 dark:text-white">
                     {{ number_format($overview['engagement']['views']) }}
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
-                    {{ $insights['avg_views'] }} avg per listing
+                    {{ __('dashboard.metrics.avg_per_listing', ['avg' => $insights['avg_views']]) }}
                 </p>
             </div>
         </div>
@@ -74,14 +74,14 @@
                 <div class="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center">
                     <x-heroicon-o-heart class="w-6 h-6 text-pink-600 dark:text-pink-400" />
                 </div>
-                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">MATCHES</span>
+                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('dashboard.metrics.matches') }}</span>
             </div>
             <div class="space-y-1">
                 <div class="text-3xl font-bold text-gray-900 dark:text-white">
                     {{ $overview['engagement']['matches'] }}
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
-                    {{ $insights['conversion'] }}% conversion rate
+                    {{ __('dashboard.metrics.conversion_rate', ['rate' => $insights['conversion']]) }}
                 </p>
             </div>
         </div>
@@ -92,14 +92,14 @@
                 <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
                     <x-heroicon-o-currency-dollar class="w-6 h-6 text-green-600 dark:text-green-400" />
                 </div>
-                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">REVENUE</span>
+                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('dashboard.metrics.revenue') }}</span>
             </div>
             <div class="space-y-1">
                 <div class="text-3xl font-bold text-gray-900 dark:text-white">
                     ${{ number_format($overview['revenue']['total'], 0) }}
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
-                    ${{ number_format($overview['revenue']['pending'], 0) }} pending
+                    {{ __('dashboard.metrics.pending_amount', ['amount' => number_format($overview['revenue']['pending'], 0)]) }}
                 </p>
             </div>
         </div>
@@ -109,8 +109,8 @@
         {{-- Top Products --}}
         <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
             <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Top Performing Products</h2>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Your most viewed listings</p>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('dashboard.top_products.title') }}</h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('dashboard.top_products.subtitle') }}</p>
             </div>
             <div class="p-6">
                 @forelse($topProducts as $product)
@@ -142,9 +142,9 @@
                 @empty
                     <div class="text-center py-12">
                         <x-heroicon-o-shopping-bag class="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                        <p class="text-gray-600 dark:text-gray-400">No products yet</p>
+                        <p class="text-gray-600 dark:text-gray-400">{{ __('dashboard.top_products.empty') }}</p>
                         <a href="{{ route('filament.app.resources.products.create') }}" class="text-sm text-primary-600 hover:text-primary-700 mt-2 inline-block">
-                            Create your first listing →
+                            {{ __('dashboard.top_products.create_first') }}
                         </a>
                     </div>
                 @endforelse
@@ -154,14 +154,14 @@
         {{-- Performance Insights --}}
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
             <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Performance</h2>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Your key metrics</p>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('dashboard.performance.title') }}</h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('dashboard.performance.subtitle') }}</p>
             </div>
             <div class="p-6 space-y-6">
                 {{-- Conversion Rate --}}
                 <div>
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Conversion Rate</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('dashboard.performance.conversion_rate') }}</span>
                         <span class="text-sm font-bold text-gray-900 dark:text-white">{{ $insights['conversion'] }}%</span>
                     </div>
                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -172,7 +172,7 @@
                 {{-- Sell-Through Rate --}}
                 <div>
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Sell-Through Rate</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('dashboard.performance.sell_through_rate') }}</span>
                         <span class="text-sm font-bold text-gray-900 dark:text-white">{{ $insights['sell_through'] }}%</span>
                     </div>
                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -186,9 +186,9 @@
                         <div class="flex items-center gap-3">
                             <x-heroicon-o-chat-bubble-left-right class="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
                             <div>
-                                <p class="font-medium text-gray-900 dark:text-white">{{ $unreadMessages }} unread messages</p>
+                                <p class="font-medium text-gray-900 dark:text-white">{{ __('dashboard.performance.unread_messages', ['count' => $unreadMessages]) }}</p>
                                 <a href="{{ route('filament.app.pages.conversations-page') }}" class="text-sm text-orange-600 dark:text-orange-400 hover:underline">
-                                    View conversations →
+                                    {{ __('dashboard.performance.view_conversations') }}
                                 </a>
                             </div>
                         </div>
@@ -199,11 +199,11 @@
                 <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <div>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $overview['engagement']['swipes'] }}</p>
-                        <p class="text-xs text-gray-600 dark:text-gray-400">Total Swipes</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ __('dashboard.performance.total_swipes') }}</p>
                     </div>
                     <div>
                         <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $overview['listings']['sold'] }}</p>
-                        <p class="text-xs text-gray-600 dark:text-gray-400">Items Sold</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ __('dashboard.performance.items_sold') }}</p>
                     </div>
                 </div>
             </div>
@@ -219,8 +219,8 @@
                     <x-heroicon-o-hand-raised class="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                    <h3 class="font-semibold text-gray-900 dark:text-white">Start Swiping</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Discover products</p>
+                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('dashboard.navigation.start_swiping') }}</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('dashboard.navigation.discover_products') }}</p>
                 </div>
             </div>
         </a>
@@ -232,8 +232,8 @@
                     <x-heroicon-o-shopping-bag class="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                    <h3 class="font-semibold text-gray-900 dark:text-white">My Listings</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Manage products</p>
+                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('dashboard.navigation.my_listings') }}</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('dashboard.navigation.manage_products') }}</p>
                 </div>
             </div>
         </a>
@@ -245,8 +245,8 @@
                     <x-heroicon-o-plus-circle class="w-6 h-6 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                    <h3 class="font-semibold text-gray-900 dark:text-white">New Listing</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Create product</p>
+                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('dashboard.navigation.new_listing') }}</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('dashboard.navigation.create_product') }}</p>
                 </div>
             </div>
         </a>

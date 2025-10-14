@@ -432,9 +432,4 @@ class ProductResource extends Resource
     {
         return 'success';
     }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return auth()->user()->hasRole('super_admin');
-    }
 }

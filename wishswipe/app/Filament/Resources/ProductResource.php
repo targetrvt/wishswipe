@@ -12,6 +12,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Notification;
+use Cheesegrits\FilamentGoogleMaps\Fields\Map;
+use Cheesegrits\FilamentGoogleMaps\Fields\Geocomplete;
 
 class ProductResource extends Resource
 {
@@ -47,9 +49,9 @@ class ProductResource extends Resource
                             ->helperText('Be specific about condition, features, and any defects'),
                         
                         Forms\Components\Select::make('category_id')
-                                ->label('Category')
-                                ->options(fn () => Category::where('is_active', true)->pluck('name', 'id'))
-                                ->required(),
+                            ->label('Category')
+                            ->options(fn () => Category::where('is_active', true)->pluck('name', 'id'))
+                            ->required(),
                         
                         Forms\Components\TextInput::make('price')
                             ->required()
@@ -82,28 +84,85 @@ class ProductResource extends Resource
                     ->columns(2)
                     ->collapsible(),
                 
-                Forms\Components\Section::make('Location')
-                    ->description('Help buyers find products near them')
+                Forms\Components\Section::make('Location & Address')
+                    ->description('Set your product location to help buyers find it')
                     ->schema([
                         Forms\Components\TextInput::make('location')
+                            ->label('Location Description')
                             ->maxLength(255)
-                            ->placeholder('City, State or ZIP code')
+                            ->placeholder('e.g., Riga, Latvia')
                             ->columnSpanFull(),
                         
-                        Forms\Components\TextInput::make('latitude')
-                            ->numeric()
-                            ->step(0.0000001)
-                            ->placeholder('e.g., 40.7128')
-                            ->helperText('Optional: GPS coordinates'),
+                        Map::make('coordinates')
+                            ->mapControls([
+                                'mapTypeControl' => true,
+                                'scaleControl' => true,
+                                'streetViewControl' => true,
+                                'rotateControl' => true,
+                                'fullscreenControl' => true,
+                                'searchBoxControl' => true,
+                                'zoomControl' => true,
+                            ])
+                            ->height(fn () => '450px')
+                            ->defaultZoom(13)
+                            ->reverseGeocode([
+                                'location' => '%n %S, %L, %A1 %z',
+                            ])
+                            ->defaultLocation([56.9496, 24.1052])
+                            ->draggable()
+                            ->clickable()
+                            ->geolocate()
+                            ->geolocateLabel('📍 Get My Location')
+                            ->geolocateOnLoad(false, false)
+                            ->columnSpanFull()
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                if (is_array($state) && isset($state['lat']) && isset($state['lng'])) {
+                                    $set('latitude', $state['lat']);
+                                    $set('longitude', $state['lng']);
+                                }
+                            })
+                            ->helperText('Click on the map to set your location, or use the search box and "Get My Location" button'),
                         
-                        Forms\Components\TextInput::make('longitude')
-                            ->numeric()
-                            ->step(0.0000001)
-                            ->placeholder('e.g., -74.0060')
-                            ->helperText('Optional: GPS coordinates'),
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('latitude')
+                                    ->label('Latitude')
+                                    ->numeric()
+                                    ->step(0.0000001)
+                                    ->placeholder('56.9496')
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                        $lng = $get('longitude');
+                                        if ($state && $lng) {
+                                            $set('coordinates', [
+                                                'lat' => (float) $state,
+                                                'lng' => (float) $lng,
+                                            ]);
+                                        }
+                                    })
+                                    ->helperText('Automatically set when using map'),
+                                
+                                Forms\Components\TextInput::make('longitude')
+                                    ->label('Longitude')
+                                    ->numeric()
+                                    ->step(0.0000001)
+                                    ->placeholder('24.1052')
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                        $lat = $get('latitude');
+                                        if ($state && $lat) {
+                                            $set('coordinates', [
+                                                'lat' => (float) $lat,
+                                                'lng' => (float) $state,
+                                            ]);
+                                        }
+                                    })
+                                    ->helperText('Automatically set when using map'),
+                            ]),
                     ])
-                    ->columns(3)
-                    ->collapsible(),
+                    ->collapsible()
+                    ->collapsed(false),
                 
                 Forms\Components\Section::make('Product Images')
                     ->description('Upload up to 5 high-quality images')
@@ -341,9 +400,7 @@ class ProductResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
@@ -359,7 +416,6 @@ class ProductResource extends Resource
     {
         $query = parent::getEloquentQuery()->with(['category', 'user']);
         
-        // Users can only see their own products, admins can see all
         if (!auth()->user()->hasRole('super_admin')) {
             $query->where('user_id', auth()->id());
         }
@@ -379,7 +435,6 @@ class ProductResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        // Hide from navigation for regular users - they should use "My Listings" page instead
         return auth()->user()->hasRole('super_admin');
     }
 }

@@ -21,13 +21,12 @@ class Product extends Model
         'condition',
         'status',
         'location',
+        'location_address',
         'latitude',
         'longitude',
         'is_active',
         'view_count',
     ];
-
-    protected $appends = ['computed_location'];
 
     protected $casts = [
         'images' => 'array',
@@ -35,20 +34,32 @@ class Product extends Model
         'latitude' => 'decimal:7',
         'longitude' => 'decimal:7',
         'is_active' => 'boolean',
-        'view_count' => 'integer',
     ];
 
-    // IMPORTANT: Add this accessor for the Google Maps component
-    // This creates a virtual "computed_location" attribute
-    public function getComputedLocationAttribute(): array
+    protected $appends = [];
+
+    public static function getLatLngAttributes(): array
     {
-        $latitude = $this->latitude ?? 56.9496;
-        $longitude = $this->longitude ?? 24.1052;
-        
         return [
-            'lat' => (float) $latitude,
-            'lng' => (float) $longitude,
+            'lat' => 'latitude',
+            'lng' => 'longitude',
         ];
+    }
+
+    public function getCoordinatesAttribute(): array
+    {
+        return [
+            'lat' => $this->latitude ? (float) $this->latitude : 0,
+            'lng' => $this->longitude ? (float) $this->longitude : 0,
+        ];
+    }
+
+    public function setCoordinatesAttribute(?array $value): void
+    {
+        if (is_array($value)) {
+            $this->attributes['latitude'] = $value['lat'] ?? null;
+            $this->attributes['longitude'] = $value['lng'] ?? null;
+        }
     }
 
     public function user(): BelongsTo
@@ -93,10 +104,131 @@ class Product extends Model
 
     public function scopeNearby($query, $lat, $lng, $radius = 50)
     {
-        return $query->whereNotNull('latitude') 
+        return $query->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->selectRaw("*, (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance", [$lat, $lng, $lat])
             ->having('distance', '<', $radius)
             ->orderBy('distance');
+    }
+
+    public function scopeWithinRadius($query, float $latitude, float $longitude, float $radiusKm = 50)
+    {
+        $earthRadiusKm = 6371;
+
+        return $query->selectRaw("
+                *,
+                (
+                    {$earthRadiusKm} * acos(
+                        cos(radians(?)) *
+                        cos(radians(latitude)) *
+                        cos(radians(longitude) - radians(?)) +
+                        sin(radians(?)) *
+                        sin(radians(latitude))
+                    )
+                ) AS distance_km
+            ", [$latitude, $longitude, $latitude])
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->having('distance_km', '<=', $radiusKm)
+            ->orderBy('distance_km');
+    }
+
+    public function getFormattedLocationAttribute(): string
+    {
+        if ($this->location_address) {
+            return $this->location_address;
+        }
+
+        if ($this->location) {
+            return $this->location;
+        }
+
+        if ($this->latitude && $this->longitude) {
+            return sprintf('%.4f, %.4f', $this->latitude, $this->longitude);
+        }
+
+        return 'Location not set';
+    }
+
+    public function hasCoordinates(): bool
+    {
+        return !is_null($this->latitude) && 
+               !is_null($this->longitude) && 
+               $this->latitude != 0 && 
+               $this->longitude != 0;
+    }
+
+    public function distanceTo(float $lat, float $lng): ?float
+    {
+        if (!$this->hasCoordinates()) {
+            return null;
+        }
+
+        $earthRadiusKm = 6371;
+
+        $latFrom = deg2rad($this->latitude);
+        $lonFrom = deg2rad($this->longitude);
+        $latTo = deg2rad($lat);
+        $lonTo = deg2rad($lng);
+
+        $latDelta = $latTo - $latFrom;
+        $lonDelta = $lonTo - $lonFrom;
+
+        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+
+        return round($angle * $earthRadiusKm, 2);
+    }
+
+    public function distanceToInMiles(float $lat, float $lng): ?float
+    {
+        $distanceKm = $this->distanceTo($lat, $lng);
+        
+        return $distanceKm ? round($distanceKm * 0.621371, 2) : null;
+    }
+
+    public function scopeOrderByDistance($query, float $latitude, float $longitude, string $direction = 'asc')
+    {
+        $earthRadiusKm = 6371;
+
+        return $query->selectRaw("
+                *,
+                (
+                    {$earthRadiusKm} * acos(
+                        cos(radians(?)) *
+                        cos(radians(latitude)) *
+                        cos(radians(longitude) - radians(?)) +
+                        sin(radians(?)) *
+                        sin(radians(latitude))
+                    )
+                ) AS distance_km
+            ", [$latitude, $longitude, $latitude])
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->orderBy('distance_km', $direction);
+    }
+
+    public function getGoogleMapsLinkAttribute(): ?string
+    {
+        if (!$this->hasCoordinates()) {
+            return null;
+        }
+
+        return sprintf(
+            'https://www.google.com/maps/search/?api=1&query=%s,%s',
+            $this->latitude,
+            $this->longitude
+        );
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($product) {
+            if (!$product->user_id) {
+                $product->user_id = auth()->id();
+            }
+        });
     }
 }

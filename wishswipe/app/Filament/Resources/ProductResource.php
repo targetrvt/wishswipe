@@ -51,9 +51,7 @@ class ProductResource extends Resource
                         Forms\Components\Select::make('category_id')
                             ->label('Category')
                             ->options(fn () => Category::where('is_active', true)->pluck('name', 'id'))
-                            ->required()
-                            ->searchable()
-                            ->preload(),
+                            ->required(),
                         
                         Forms\Components\TextInput::make('price')
                             ->required()
@@ -86,14 +84,45 @@ class ProductResource extends Resource
                     ->columns(2)
                     ->collapsible(),
                 
-                Forms\Components\Section::make('Location')
-                    ->description('Help buyers find products near them')
+                Forms\Components\Section::make('Location & Address')
+                    ->description('Set your product location to help buyers find it')
                     ->schema([
                         Forms\Components\TextInput::make('location')
-                            ->label('Location Address')
-                            ->placeholder('e.g., Riga, Latvia or Brīvības iela 1, Rīga')
+                            ->label('Location Description')
+                            ->maxLength(255)
+                            ->placeholder('e.g., Riga, Latvia')
+                            ->columnSpanFull(),
+                        
+                        Map::make('coordinates')
+                            ->mapControls([
+                                'mapTypeControl' => true,
+                                'scaleControl' => true,
+                                'streetViewControl' => true,
+                                'rotateControl' => true,
+                                'fullscreenControl' => true,
+                                'searchBoxControl' => true,
+                                'zoomControl' => true,
+                            ])
+                            ->height(fn () => '450px')
+                            ->defaultZoom(13)
+                            ->reverseGeocode([
+                                'location' => '%n %S, %L, %A1 %z',
+                            ])
+                            ->defaultLocation([56.9496, 24.1052])
+                            ->draggable()
+                            ->clickable()
+                            ->geolocate()
+                            ->geolocateLabel('📍 Get My Location')
+                            ->geolocateOnLoad(false, false)
                             ->columnSpanFull()
-                            ->helperText('Enter the full address where the product is located'),
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                if (is_array($state) && isset($state['lat']) && isset($state['lng'])) {
+                                    $set('latitude', $state['lat']);
+                                    $set('longitude', $state['lng']);
+                                }
+                            })
+                            ->helperText('Click on the map to set your location, or use the search box and "Get My Location" button'),
                         
                         Forms\Components\Grid::make(2)
                             ->schema([
@@ -101,82 +130,39 @@ class ProductResource extends Resource
                                     ->label('Latitude')
                                     ->numeric()
                                     ->step(0.0000001)
-                                    ->default(56.9496)
-                                    ->required()
-                                    ->live()
-                                    ->helperText('Will be used for nearby search'),
+                                    ->placeholder('56.9496')
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                        $lng = $get('longitude');
+                                        if ($state && $lng) {
+                                            $set('coordinates', [
+                                                'lat' => (float) $state,
+                                                'lng' => (float) $lng,
+                                            ]);
+                                        }
+                                    })
+                                    ->helperText('Automatically set when using map'),
                                 
                                 Forms\Components\TextInput::make('longitude')
                                     ->label('Longitude')
                                     ->numeric()
                                     ->step(0.0000001)
-                                    ->default(24.1052)
-                                    ->required()
-                                    ->live()
-                                    ->helperText('Will be used for nearby search'),
+                                    ->placeholder('24.1052')
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                        $lat = $get('latitude');
+                                        if ($state && $lat) {
+                                            $set('coordinates', [
+                                                'lat' => (float) $lat,
+                                                'lng' => (float) $state,
+                                            ]);
+                                        }
+                                    })
+                                    ->helperText('Automatically set when using map'),
                             ]),
-                        
-                        // Map component - should now be visible since API key is configured
-                        Map::make('computed_location')
-                            ->label('Interactive Map (Drag marker to set location)')
-                            ->mapControls([
-                                'mapTypeControl' => true,
-                                'scaleControl' => true,
-                                'streetViewControl' => true,
-                                'zoomControl' => true,
-                            ])
-                            ->height('400px')
-                            ->defaultZoom(15)
-                            ->draggable(true)
-                            ->clickable(true)
-                            ->columnSpanFull()
-                            ->afterStateHydrated(function ($state, $record, $set, $get) {
-                                if ($record && $record->latitude && $record->longitude) {
-                                    $set('computed_location', [
-                                        'lat' => (float) $record->latitude,
-                                        'lng' => (float) $record->longitude,
-                                    ]);
-                                } else {
-                                    $lat = $get('latitude') ?? 56.9496;
-                                    $lng = $get('longitude') ?? 24.1052;
-                                    $set('computed_location', [
-                                        'lat' => (float) $lat,
-                                        'lng' => (float) $lng,
-                                    ]);
-                                }
-                            })
-                            ->afterStateUpdated(function ($state, callable $set) {
-                                if (is_array($state) && isset($state['lat'], $state['lng'])) {
-                                    $set('latitude', $state['lat']);
-                                    $set('longitude', $state['lng']);
-                                }
-                            })
-                            ->live()
-                            ->dehydrated(false),
-                            // Removed ->visible() to force it to show
-                        
-                        Forms\Components\Placeholder::make('map_link')
-                            ->label('View on Map')
-                            ->content(function ($record, $get) {
-                                $lat = $get('latitude') ?? $record?->latitude ?? 56.9496;
-                                $lng = $get('longitude') ?? $record?->longitude ?? 24.1052;
-                                return new \Illuminate\Support\HtmlString(
-                                    '<a href="https://www.google.com/maps/search/?api=1&query=' . $lat . ',' . $lng . '" 
-                                        target="_blank" 
-                                        class="text-primary-600 hover:text-primary-700 underline flex items-center gap-1">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        </svg>
-                                        Open in Google Maps →
-                                    </a>
-                                    <p class="text-xs text-gray-500 mt-1">Click to verify the location on Google Maps</p>'
-                                );
-                            })
-                            ->columnSpanFull(),
                     ])
-                    ->columns(1)
-                    ->collapsible(),
+                    ->collapsible()
+                    ->collapsed(false),
                 
                 Forms\Components\Section::make('Product Images')
                     ->description('Upload up to 5 high-quality images')
@@ -237,13 +223,7 @@ class ProductResource extends Resource
                     ->stacked()
                     ->limit(1)
                     ->defaultImageUrl(url('/images/placeholder.jpg'))
-                    ->getStateUsing(function ($record) {
-                        if (!$record->images) {
-                            return null;
-                        }
-                        $images = is_string($record->images) ? json_decode($record->images, true) : $record->images;
-                        return is_array($images) && count($images) > 0 ? $images[0] : null;
-                    }),
+                    ->getStateUsing(fn ($record) => $record->images[0] ?? null),
                 
                 Tables\Columns\TextColumn::make('title')
                     ->searchable()
@@ -264,7 +244,7 @@ class ProductResource extends Resource
                         'info' => 'like_new',
                         'warning' => 'used',
                     ])
-                    ->formatStateUsing(fn ($state) => $state ? ucfirst(str_replace('_', ' ', $state)) : 'N/A'),
+                    ->formatStateUsing(fn ($state) => ucfirst(str_replace('_', ' ', $state))),
                 
                 Tables\Columns\BadgeColumn::make('status')
                     ->colors([
@@ -272,7 +252,7 @@ class ProductResource extends Resource
                         'warning' => 'reserved',
                         'danger' => 'sold',
                     ])
-                    ->formatStateUsing(fn ($state) => $state ? ucfirst($state) : 'N/A'),
+                    ->formatStateUsing(fn ($state) => ucfirst($state)),
                 
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean()
@@ -283,14 +263,7 @@ class ProductResource extends Resource
                     ->label('Views')
                     ->sortable()
                     ->alignCenter()
-                    ->icon('heroicon-m-eye')
-                    ->default(0),
-                
-                Tables\Columns\TextColumn::make('location')
-                    ->searchable()
-                    ->limit(30)
-                    ->toggleable()
-                    ->formatStateUsing(fn ($state) => $state ?: 'N/A'),
+                    ->icon('heroicon-m-eye'),
                 
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -334,14 +307,6 @@ class ProductResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
-                    
-                    Tables\Actions\Action::make('view_map')
-                        ->label('View on Map')
-                        ->icon('heroicon-o-map-pin')
-                        ->color('info')
-                        ->visible(fn ($record) => $record->latitude && $record->longitude)
-                        ->url(fn ($record) => "https://www.google.com/maps/search/?api=1&query={$record->latitude},{$record->longitude}")
-                        ->openUrlInNewTab(),
                     
                     Tables\Actions\Action::make('mark_sold')
                         ->label('Mark as Sold')
@@ -435,9 +400,7 @@ class ProductResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
@@ -453,7 +416,6 @@ class ProductResource extends Resource
     {
         $query = parent::getEloquentQuery()->with(['category', 'user']);
         
-        // Users can only see their own products, admins can see all
         if (!auth()->user()->hasRole('super_admin')) {
             $query->where('user_id', auth()->id());
         }
@@ -469,5 +431,10 @@ class ProductResource extends Resource
     public static function getNavigationBadgeColor(): ?string
     {
         return 'success';
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->hasRole('super_admin');
     }
 }

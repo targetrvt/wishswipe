@@ -1,4 +1,3 @@
-🛒 WishSwipe
 <p align="center"> <img src="https://raw.githubusercontent.com/targetrvt/wishswipe/main/wishswipe/public/images/wishSwipe_logo2.png" alt="WishSwipe Logo" width="300"> </p> <p align="center"> <strong>Swipe Your Way to Great Deals!</strong><br> An innovative marketplace platform combining the swiping experience of dating apps with online shopping. </p> <p align="center"> <img src="https://img.shields.io/badge/Laravel-11.x-FF2D20?style=for-the-badge&logo=laravel" alt="Laravel"> <img src="https://img.shields.io/badge/Filament-3.x-FFAA00?style=for-the-badge" alt="Filament"> <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php" alt="PHP"> <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License"> </p>
 📖 About
 

@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
+use App\Models\User;
+use App\Observers\UserObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,13 +21,14 @@ class AppServiceProvider extends ServiceProvider
      * Bootstrap any application services.
      */
     public function boot(): void
-{
-    view()->composer('*', function ($view) {
-        app()->setLocale(session('locale', 'en'));
-    });
-    LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
-        $switch->locales(['lv', 'en']); // Also accepts a closure
-    });
+    {
+        view()->composer('*', function ($view) {
+            app()->setLocale(session('locale', 'en'));
+        });
+        LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
+            $switch->locales(['lv', 'en']); // Also accepts a closure
+        });
 
-}
+        User::observe(UserObserver::class);
+    }
 }

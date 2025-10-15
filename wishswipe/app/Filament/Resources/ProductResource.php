@@ -118,8 +118,10 @@ class ProductResource extends Resource
                             ->reactive()
                             ->afterStateUpdated(function ($state, callable $get, callable $set) {
                                 if (is_array($state) && isset($state['lat']) && isset($state['lng'])) {
-                                    $set('latitude', $state['lat']);
-                                    $set('longitude', $state['lng']);
+                                    $lat = round((float) $state['lat'], 4);
+                                    $lng = round((float) $state['lng'], 4);
+                                    $set('latitude', $lat);
+                                    $set('longitude', $lng);
                                 }
                             })
                             ->helperText('Click on the map to set your location, or use the search box and "Get My Location" button'),
@@ -129,15 +131,22 @@ class ProductResource extends Resource
                                 Forms\Components\TextInput::make('latitude')
                                     ->label('Latitude')
                                     ->numeric()
-                                    ->step(0.0000001)
+                                    ->step(0.0001)
+                                    ->minValue(-90)
+                                    ->maxValue(90)
+                                    ->rule('regex:/^-?\\d{1,2}\\.\\d{1,4}$/')
                                     ->placeholder('56.9496')
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                        $rounded = is_numeric($state) ? round((float) $state, 4) : null;
+                                        if ($rounded !== null) {
+                                            $set('latitude', $rounded);
+                                        }
                                         $lng = $get('longitude');
-                                        if ($state && $lng) {
+                                        if ($rounded !== null && $lng) {
                                             $set('coordinates', [
-                                                'lat' => (float) $state,
-                                                'lng' => (float) $lng,
+                                                'lat' => (float) $rounded,
+                                                'lng' => (float) round((float) $lng, 4),
                                             ]);
                                         }
                                     })
@@ -146,15 +155,22 @@ class ProductResource extends Resource
                                 Forms\Components\TextInput::make('longitude')
                                     ->label('Longitude')
                                     ->numeric()
-                                    ->step(0.0000001)
+                                    ->step(0.0001)
+                                    ->minValue(-180)
+                                    ->maxValue(180)
+                                    ->rule('regex:/^-?\\d{1,3}\\.\\d{1,4}$/')
                                     ->placeholder('24.1052')
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                        $rounded = is_numeric($state) ? round((float) $state, 4) : null;
+                                        if ($rounded !== null) {
+                                            $set('longitude', $rounded);
+                                        }
                                         $lat = $get('latitude');
-                                        if ($state && $lat) {
+                                        if ($rounded !== null && $lat) {
                                             $set('coordinates', [
-                                                'lat' => (float) $lat,
-                                                'lng' => (float) $state,
+                                                'lat' => (float) round((float) $lat, 4),
+                                                'lng' => (float) $rounded,
                                             ]);
                                         }
                                     })

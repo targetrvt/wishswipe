@@ -31,8 +31,8 @@ class Product extends Model
     protected $casts = [
         'images' => 'array',
         'price' => 'decimal:2',
-        'latitude' => 'decimal:7',
-        'longitude' => 'decimal:7',
+        'latitude' => 'decimal:4',
+        'longitude' => 'decimal:4',
         'is_active' => 'boolean',
     ];
 

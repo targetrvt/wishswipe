@@ -1,5 +1,5 @@
 🛒 WishSwipe
-<p align="center"> <img src="public/images/wishSwipe_logo.png" alt="WishSwipe Logo" width="300"> </p> <p align="center"> <strong>Swipe Your Way to Great Deals!</strong><br> An innovative marketplace platform combining the swiping experience of dating apps with online shopping. </p> <p align="center"> <img src="https://img.shields.io/badge/Laravel-11.x-FF2D20?style=for-the-badge&logo=laravel" alt="Laravel"> <img src="https://img.shields.io/badge/Filament-3.x-FFAA00?style=for-the-badge" alt="Filament"> <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php" alt="PHP"> <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License"> </p>
+<p align="center"> <img src="./public/images/wishSwipe_logo.png" alt="WishSwipe Logo" width="300"> </p> <p align="center"> <strong>Swipe Your Way to Great Deals!</strong><br> An innovative marketplace platform combining the swiping experience of dating apps with online shopping. </p> <p align="center"> <img src="https://img.shields.io/badge/Laravel-11.x-FF2D20?style=for-the-badge&logo=laravel" alt="Laravel"> <img src="https://img.shields.io/badge/Filament-3.x-FFAA00?style=for-the-badge" alt="Filament"> <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php" alt="PHP"> <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License"> </p>
 📖 About
 
 WishSwipe reimagines online shopping through a swipe-based interface. Swipe right on products you love and connect instantly with sellers.
@@ -59,9 +59,9 @@ Google Maps API Key
 
 OpenAI API Key
 
-🚀 Installation (Linux)
+🚀 Installation (Linux, Windows, Mac)
 # 1. Clone repository
-git clone https://github.com/yourusername/wishswipe.git
+git clone https://github.com/targetrvt/wishswipe.git
 cd wishswipe
 
 # 2. Install PHP dependencies

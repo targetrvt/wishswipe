@@ -91,6 +91,7 @@ class AppPanelProvider extends PanelProvider
                         shouldRegisterUserMenu: true,
                         hasAvatars: true
                     )
+                    ->enableTwoFactorAuthentication()
             ]);
     }
 }

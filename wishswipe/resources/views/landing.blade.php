@@ -269,6 +269,12 @@
                 
                 @auth
                     <a href="{{ url('/app') }}" class="btn btn-primary">{{ __('messages.landing.nav.dashboard') }}</a>
+                    @if(auth()->user()->hasRole('super_admin'))
+                        <a href="{{ url('/admin') }}" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-shield-alt mr-2"></i>
+                            Admin Panel
+                        </a>
+                    @endif
                 @else
                     <a href="{{ url('/app/login') }}" class="nav-link">{{ __('messages.landing.nav.login') }}</a>
                     <a href="{{ url('/app/register') }}" class="btn btn-primary">{{ __('messages.landing.nav.get_started') }}</a>
@@ -321,7 +327,14 @@
             <a href="#categories" onclick="toggleMobileMenu()">{{ __('messages.landing.nav.categories') }}</a>
             
             @auth
-                <a href="{{ url('/app') }}" class="btn btn-primary">{{ __('messages.landing.nav.dashboard') }}</a>
+                @if(auth()->user()->hasRole('super_admin'))
+                    <a href="{{ url('/admin') }}" class="btn btn-primary">
+                        <i class="fas fa-shield-alt mr-2"></i>
+                        Admin Panel
+                    </a>
+                @else
+                    <a href="{{ url('/app') }}" class="btn btn-primary">{{ __('messages.landing.nav.dashboard') }}</a>
+                @endif
             @else
                 <a href="{{ url('/app/login') }}">{{ __('messages.landing.nav.login') }}</a>
                 <a href="{{ url('/app/register') }}" class="btn btn-primary">{{ __('messages.landing.nav.get_started') }}</a>
@@ -346,10 +359,17 @@
                             {{ __('messages.landing.hero.start_swiping') }}
                         </a>
                     @else
-                        <a href="{{ url('/app') }}" class="btn btn-primary btn-large">
-                            <i class="fas fa-home mr-2"></i>
-                            {{ __('messages.landing.hero.go_to_app') }}
-                        </a>
+                        @if(auth()->user()->hasRole('super_admin'))
+                            <a href="{{ url('/admin') }}" class="btn btn-primary btn-large">
+                                <i class="fas fa-shield-alt mr-2"></i>
+                                Admin Panel
+                            </a>
+                        @else
+                            <a href="{{ url('/app') }}" class="btn btn-primary btn-large">
+                                <i class="fas fa-home mr-2"></i>
+                                {{ __('messages.landing.hero.go_to_app') }}
+                            </a>
+                        @endif
                     @endguest
                     <button class="btn btn-secondary btn-large" onclick="playVideo()">
                         <i class="fas fa-play mr-2"></i>
@@ -578,10 +598,17 @@
                             {{ __('messages.landing.cta.sign_in') }}
                         </a>
                     @else
-                        <a href="{{ url('/app') }}" class="btn btn-primary btn-large">
-                            <i class="fas fa-home mr-2"></i>
-                            {{ __('messages.landing.cta.go_to_dashboard') }}
-                        </a>
+                        @if(auth()->user()->hasRole('super_admin'))
+                            <a href="{{ url('/admin') }}" class="btn btn-primary btn-large">
+                                <i class="fas fa-shield-alt mr-2"></i>
+                                Admin Panel
+                            </a>
+                        @else
+                            <a href="{{ url('/app') }}" class="btn btn-primary btn-large">
+                                <i class="fas fa-home mr-2"></i>
+                                {{ __('messages.landing.cta.go_to_dashboard') }}
+                            </a>
+                        @endif
                         <a href="{{ url('/app/logout') }}" class="btn btn-outline btn-large" 
                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                             <i class="fas fa-sign-out-alt mr-2"></i>

@@ -7,6 +7,7 @@ use Filament\Panel;
 use Filament\Widgets;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Navigation\NavigationItem;
 use Filament\Http\Middleware\Authenticate;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
 use App\Filament\Widgets\UserBalanceWidget;
@@ -67,6 +68,14 @@ class AppPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+            ])
+            ->navigationItems([
+                NavigationItem::make('Admin Panel')
+                    ->url('/admin')
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->sort(0)
+                    ->visible(fn (): bool => auth()->check() && auth()->user()->hasRole('super_admin'))
+                    ->openUrlInNewTab(false),
             ])
             ->plugins([
                 ChatgptAgentPlugin::make()

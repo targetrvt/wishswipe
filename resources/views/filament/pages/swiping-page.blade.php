@@ -468,7 +468,7 @@
         <div class="filter-filament-wrapper">
             <x-filament::input.wrapper>
                 <x-filament::input.select wire:model.live="selectedCategory">
-                    <option value="">All Categories</option>
+                    <option value="">{{ __('discover.filters.all_categories') }}</option>
                     @foreach(\App\Models\Category::where('is_active', true)->orderBy('name')->get() as $category)
                         <option value="{{ $category->id }}">{{ $category->name }}</option>
                     @endforeach
@@ -481,8 +481,8 @@
                     color="gray"
                     size="md"
                     icon="heroicon-o-x-mark"
-                    tooltip="Clear filter">
-                    Clear
+                    tooltip="{{ __('discover.filters.clear_tooltip') }}">
+                    {{ __('discover.filters.clear') }}
                 </x-filament::button>
             @endif
         </div>
@@ -496,14 +496,15 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
-                <h2 class="empty-state-title">You're All Caught Up!</h2>
+                <h2 class="empty-state-title">{{ __('discover.empty.title') }}</h2>
                 <p class="empty-state-text">
-                    You've explored all available products. Check back soon for new items or adjust your filters.
+                    {{ __('discover.empty.description') }}
                 </p>
                 <button 
                     wire:click="loadProducts" 
                     class="action-btn like"
-                    style="position: relative; width: 70px; height: 70px;">
+                    style="position: relative; width: 70px; height: 70px;"
+                    title="{{ __('discover.empty.reload_title') }}">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 32px; height: 32px;">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
@@ -530,7 +531,7 @@
                         
                         <div style="position: absolute; top: 1rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
                             <span class="card-badge" style="background: rgba(255, 255, 255, 0.95); color: #1f2937; backdrop-filter: blur(10px);">
-                                {{ $currentProduct['category']['name'] ?? 'Uncategorized' }}
+                                {{ $currentProduct['category']['name'] ?? __('discover.card.uncategorized') }}
                             </span>
                             <span class="card-badge" style="
                                 @if($currentProduct['condition'] === 'new')
@@ -541,7 +542,7 @@
                                     background: rgba(251, 146, 60, 0.95); color: white;
                                 @endif
                             ">
-                                {{ ucfirst(str_replace('_', ' ', $currentProduct['condition'])) }}
+                                {{ __(sprintf('discover.conditions.%s', $currentProduct['condition'])) }}
                             </span>
                         </div>
                     </div>
@@ -589,7 +590,8 @@
                 <button 
                     @click="swipeCard('left')" 
                     class="action-btn nope"
-                    wire:loading.attr="disabled">
+                    wire:loading.attr="disabled"
+                    title="{{ __('discover.actions.pass') }}">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 32px; height: 32px;">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -598,7 +600,8 @@
                 <button 
                     @click="swipeCard('right')" 
                     class="action-btn like"
-                    wire:loading.attr="disabled">
+                    wire:loading.attr="disabled"
+                    title="{{ __('discover.actions.add_to_cart') }}">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 32px; height: 32px;">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
@@ -607,14 +610,14 @@
 
             <div class="keyboard-hint">
                 <kbd>←</kbd>
-                Pass  •
+                {{ __('discover.keyboard.pass') }}  •
                 <kbd>→</kbd>
-                Add to Cart
+                {{ __('discover.keyboard.add_to_cart') }}
             </div>
         @else
             <div class="loading-state">
                 <div class="loading-spinner"></div>
-                <p class="loading-text">Loading amazing products...</p>
+                <p class="loading-text">{{ __('discover.loading.message') }}</p>
             </div>
         @endif
     </div>
@@ -628,8 +631,8 @@
         <svg class="match-notification-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
-        <h3 class="match-notification-title">Added to Cart! 🛒</h3>
-        <p class="match-notification-text">Product has been added to your cart</p>
+        <h3 class="match-notification-title">{{ __('discover.notification.title') }}</h3>
+        <p class="match-notification-text">{{ __('discover.notification.message') }}</p>
     </div>
 
     @script

@@ -15,14 +15,18 @@ use Illuminate\Support\Facades\Log;
 class SwipingPage extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-hand-raised';
-    
     protected static string $view = 'filament.pages.swiping-page';
-    
-    protected static ?string $title = 'Discover';
-    
-    protected static ?string $navigationLabel = 'Discover';
-    
     protected static ?int $navigationSort = 1;
+    
+    public static function getNavigationLabel(): string
+    {
+        return __('discover.navigation_label');
+    }
+    
+    public function getTitle(): string
+    {
+        return __('discover.page_title');
+    }
 
     public ?array $currentProduct = null;
     public array $productsStack = [];
@@ -32,7 +36,6 @@ class SwipingPage extends Page
     private const STACK_SIZE = 15;
     private const MIN_STACK_SIZE = 5;
     private const CACHE_TTL = 3600;
-
 
     public function mount(): void
     {
@@ -51,7 +54,7 @@ class SwipingPage extends Page
 
             $this->populateStack($products);
         } catch (\Exception $e) {
-            $this->handleError('Failed to load products', $e);
+            $this->handleError(__('discover.errors.load_failed'), $e);
             $this->setEmptyState();
         }
     }
@@ -66,7 +69,7 @@ class SwipingPage extends Page
             $this->recordSwipe('left');
             $this->moveToNextProduct();
         } catch (\Exception $e) {
-            $this->handleError('Swipe left failed', $e);
+            $this->handleError(__('discover.errors.swipe_failed'), $e);
             $this->moveToNextProduct();
         }
     }
@@ -81,9 +84,9 @@ class SwipingPage extends Page
             DB::beginTransaction();
 
             $this->recordSwipe('right');
-            
+
             $product = Product::find($this->currentProduct['id']);
-            
+
             if ($product && $this->createMatchIfMutual($product)) {
                 $this->notifyMatch();
             }
@@ -92,7 +95,7 @@ class SwipingPage extends Page
             $this->moveToNextProduct();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->handleError('Swipe right failed', $e);
+            $this->handleError(__('discover.errors.swipe_failed'), $e);
             $this->moveToNextProduct();
         }
     }
@@ -121,12 +124,14 @@ class SwipingPage extends Page
         );
     }
 
-    // Private Helper Methods !!!
+    // -------------------------------
+    // Helpers
+    // -------------------------------
 
     private function fetchProducts(int $limit): \Illuminate\Database\Eloquent\Collection
     {
         $userId = auth()->id();
-        
+
         return Product::query()
             ->active()
             ->where('user_id', '!=', $userId)
@@ -134,8 +139,8 @@ class SwipingPage extends Page
             ->when($this->selectedCategory, fn($q) => $q->where('category_id', $this->selectedCategory))
             ->with(['category:id,name,icon', 'user:id,name'])
             ->select([
-                'id', 'title', 'description', 'price', 
-                'condition', 'location', 'images', 
+                'id', 'title', 'description', 'price',
+                'condition', 'location', 'images',
                 'category_id', 'user_id', 'created_at'
             ])
             ->inRandomOrder()
@@ -157,7 +162,7 @@ class SwipingPage extends Page
         if (empty($this->currentProduct) && !empty($productsArray)) {
             $this->currentProduct = array_shift($productsArray);
         }
-        
+
         $this->productsStack = $productsArray;
         $this->noMoreProducts = false;
     }
@@ -174,12 +179,12 @@ class SwipingPage extends Page
             'images' => $this->normalizeImages($product->images),
             'category' => [
                 'id' => $product->category?->id,
-                'name' => $product->category?->name ?? 'Uncategorized',
+                'name' => $product->category?->name ?? __('discover.uncategorized'),
                 'icon' => $product->category?->icon,
             ],
             'user' => [
                 'id' => $product->user?->id,
-                'name' => $product->user?->name ?? 'Unknown',
+                'name' => $product->user?->name ?? __('discover.unknown_user'),
             ],
             'created_at' => $product->created_at?->diffForHumans(),
         ];
@@ -190,12 +195,12 @@ class SwipingPage extends Page
         if (is_array($images)) {
             return $images;
         }
-        
+
         if (is_string($images)) {
             $decoded = json_decode($images, true);
             return is_array($decoded) ? $decoded : [];
         }
-        
+
         return [];
     }
 
@@ -208,10 +213,11 @@ class SwipingPage extends Page
         ]);
     }
 
-        private function createMatchIfMutual(Product $product): bool
+    private function createMatchIfMutual(Product $product): bool
     {
         $currentUserId = auth()->id();
         $sellerId = $product->user_id;
+
         $match = Matched::firstOrCreate(
             [
                 'buyer_id' => $currentUserId,
@@ -253,7 +259,7 @@ class SwipingPage extends Page
     {
         try {
             $excludeIds = $this->getExcludedProductIds();
-            
+
             $products = Product::query()
                 ->active()
                 ->where('user_id', '!=', auth()->id())
@@ -271,10 +277,10 @@ class SwipingPage extends Page
                 ->get();
 
             $newProducts = $products->map(fn($product) => $this->formatProduct($product))->toArray();
-            
+
             $this->productsStack = array_merge($this->productsStack, $newProducts);
         } catch (\Exception $e) {
-            $this->handleError('Failed to refill stack', $e);
+            $this->handleError(__('discover.errors.refill_failed'), $e);
         }
     }
 
@@ -304,11 +310,11 @@ class SwipingPage extends Page
     private function notifyMatch(): void
     {
         $this->dispatch('show-match-notification');
-        
+
         Notification::make()
             ->success()
-            ->title('It\'s a Match! 💫')
-            ->body('You can now message each other')
+            ->title(__('discover.notifications.match_title'))
+            ->body(__('discover.notifications.match_body'))
             ->duration(5000)
             ->send();
     }
@@ -323,8 +329,8 @@ class SwipingPage extends Page
 
         Notification::make()
             ->warning()
-            ->title('Oops!')
-            ->body('Something went wrong. Please try again.')
+            ->title(__('discover.notifications.error_title'))
+            ->body(__('discover.notifications.error_body'))
             ->send();
     }
 }

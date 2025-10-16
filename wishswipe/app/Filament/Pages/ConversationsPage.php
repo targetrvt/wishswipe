@@ -12,11 +12,17 @@ class ConversationsPage extends Page
     
     protected static string $view = 'filament.pages.conversations-page';
     
-    protected static ?string $title = 'My Conversations';
+    public static function getNavigationLabel(): string
+    {
+        return __('conversations.navigation_label');
+    }
+    
+    public function getTitle(): string
+    {
+        return __('conversations.page_title');
+    }
     
     protected static ?int $navigationSort = 3;
-    
-    protected static ?string $navigationLabel = 'Messages';
 
     public $selectedConversationId = null;
     public $messageContent = '';

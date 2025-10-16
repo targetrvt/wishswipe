@@ -78,6 +78,7 @@ class AdminPanelProvider extends PanelProvider
                         shouldRegisterUserMenu: true,
                         hasAvatars: true
                     )
+                    ->enableTwoFactorAuthentication()
             ]);
     }
 }

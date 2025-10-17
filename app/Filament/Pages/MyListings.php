@@ -188,6 +188,7 @@ class MyListings extends Page implements HasForms, HasTable
                             Geocomplete::make('location')
                                 ->label(__('my_listings.form.location'))
                                 ->isLocation()
+                                ->default([])
                                 ->reverseGeocode([
                                     'city' => '%L',
                                     'zip' => '%z',

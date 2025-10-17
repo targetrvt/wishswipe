@@ -100,6 +100,7 @@ class ProductResource extends Resource
                         Geocomplete::make('location')
                             ->label('Location Description')
                             ->isLocation()
+                            ->default([])
                             ->reverseGeocode([
                                 'city' => '%L',
                                 'zip' => '%z',

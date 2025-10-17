@@ -185,7 +185,7 @@ class MyListings extends Page implements HasForms, HasTable
                                 ])
                                 ->required(),
                             
-                            Geocomplete::make('location')
+                            Geocomplete::make('location_address')
                                 ->label(__('my_listings.form.location'))
                                 ->isLocation()
                                 ->default([])

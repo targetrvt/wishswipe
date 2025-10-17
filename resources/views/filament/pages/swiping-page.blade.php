@@ -517,7 +517,7 @@
 
                 <div class="swipe-card" id="currentCard">
                     @php
-                        $hasImage = !empty($currentProduct['images']) && isset($currentProduct['images'][0]) && $currentProduct['images'][0];
+                        $hasImage = !empty($currentProduct['images']) && is_array($currentProduct['images']) && isset($currentProduct['images'][0]) && $currentProduct['images'][0];
                         $imageUrl = $hasImage ? Storage::url($currentProduct['images'][0]) : '';
                     @endphp
                     <div class="card-image" style="background-image: url('{{ $imageUrl }}'); background-size: cover; background-position: center;">

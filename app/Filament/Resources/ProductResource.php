@@ -87,9 +87,16 @@ class ProductResource extends Resource
                 Forms\Components\Section::make('Location & Address')
                     ->description('Set your product location to help buyers find it')
                     ->schema([
-                        Forms\Components\TextInput::make('location')
+                        Geocomplete::make('location')
                             ->label('Location Description')
-                            ->maxLength(255)
+                            ->isLocation()
+                            ->reverseGeocode([
+                                'city' => '%L',
+                                'zip' => '%z',
+                                'state' => '%A1',
+                                'country' => '%c',
+                            ])
+                            ->countries(['us', 'gb', 'lv'])
                             ->placeholder('e.g., Riga, Latvia')
                             ->columnSpanFull(),
                         
@@ -100,11 +107,13 @@ class ProductResource extends Resource
                                 'streetViewControl' => true,
                                 'rotateControl' => true,
                                 'fullscreenControl' => true,
-                                'searchBoxControl' => true,
+                                'searchBoxControl' => false,
                                 'zoomControl' => true,
                             ])
                             ->height(fn () => '450px')
                             ->defaultZoom(13)
+                            ->autocomplete('location')
+                            ->autocompleteReverse(true)
                             ->reverseGeocode([
                                 'location' => '%n %S, %L, %A1 %z',
                             ])
@@ -239,7 +248,7 @@ class ProductResource extends Resource
                     ->stacked()
                     ->limit(1)
                     ->defaultImageUrl(url('/images/placeholder.jpg'))
-                    ->getStateUsing(fn ($record) => $record->images[0] ?? null),
+                    ->getStateUsing(fn ($record) => $record->first_image),
                 
                 Tables\Columns\TextColumn::make('title')
                     ->searchable()

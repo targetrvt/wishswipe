@@ -89,7 +89,12 @@ class Product extends Model
 
     public function getFirstImageAttribute()
     {
-        return $this->images[0] ?? null;
+        if (is_string($this->images)) {
+            $images = json_decode($this->images, true);
+            return is_array($images) ? ($images[0] ?? null) : null;
+        }
+        
+        return is_array($this->images) ? ($this->images[0] ?? null) : null;
     }
 
     public function incrementViewCount()

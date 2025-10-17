@@ -34,6 +34,7 @@ class Product extends Model
         'latitude' => 'decimal:4',
         'longitude' => 'decimal:4',
         'is_active' => 'boolean',
+        'location_address' => 'array',
     ];
 
     protected $appends = [];
@@ -60,6 +61,24 @@ class Product extends Model
             $this->attributes['latitude'] = $value['lat'] ?? null;
             $this->attributes['longitude'] = $value['lng'] ?? null;
         }
+    }
+
+    public function getLocationAddressAttribute($value)
+    {
+        if (is_string($value)) {
+            return [
+                'formatted_address' => $value,
+                'address_components' => [],
+                'geometry' => [
+                    'location' => [
+                        'lat' => $this->latitude ?? 0,
+                        'lng' => $this->longitude ?? 0,
+                    ]
+                ]
+            ];
+        }
+        
+        return $value ?: [];
     }
 
     public function user(): BelongsTo

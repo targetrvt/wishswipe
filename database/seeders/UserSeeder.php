@@ -29,7 +29,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Regular User',
                 'password' => Hash::make('12345678'),
-                'avatar_url' => 'https://via.placeholder.com/100?text=User',
+                'avatar_url' => null,
             ]
         );
 
@@ -44,7 +44,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Admin User',
                 'password' => Hash::make('87654321'),
-                'avatar_url' => 'https://via.placeholder.com/100?text=Admin',
+                'avatar_url' => 'null',
             ]
         );
 

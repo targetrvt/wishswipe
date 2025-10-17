@@ -95,6 +95,11 @@
             opacity: 1;
         }
 
+        /* Ensure the current card always has full opacity */
+        #currentCard {
+            opacity: 1 !important;
+        }
+
         .card-image {
             width: 100%;
             height: 55%;
@@ -828,6 +833,7 @@
             currentX: 0,
             currentY: 0,
             isDragging: false,
+            hasMoved: false,
             card: null,
 
             init() {
@@ -854,6 +860,7 @@
                 }
                 
                 this.isDragging = true;
+                this.hasMoved = false;
                 this.card.classList.add('dragging');
 
                 const touch = e.type.includes('touch') ? e.touches[0] : e;
@@ -869,6 +876,11 @@
                 const touch = e.type.includes('touch') ? e.touches[0] : e;
                 this.currentX = touch.clientX - this.startX;
                 this.currentY = touch.clientY - this.startY;
+                
+                // Mark that we've moved if there's any significant movement
+                if (Math.abs(this.currentX) > 5 || Math.abs(this.currentY) > 5) {
+                    this.hasMoved = true;
+                }
 
                 const constrainedY = this.currentY * 0.2;
 
@@ -901,11 +913,15 @@
 
                 const threshold = 150;
 
-                if (Math.abs(this.currentX) > threshold) {
+                // Only trigger swipe if there was actual movement and it exceeds threshold
+                if (this.hasMoved && Math.abs(this.currentX) > threshold) {
                     this.completeSwipe(this.currentX > 0 ? 'right' : 'left');
                 } else {
                     this.resetCard();
                 }
+
+                // Reset movement flag
+                this.hasMoved = false;
 
                 document.getElementById('nopeIndicator').classList.remove('active');
                 document.getElementById('likeIndicator').classList.remove('active');
@@ -941,6 +957,7 @@
                 
                 this.card.style.transform = '';
                 this.card.style.opacity = '1';
+                this.card.style.setProperty('opacity', '1', 'important');
                 this.currentX = 0;
                 this.currentY = 0;
                 this.card.classList.remove('removing');
@@ -1098,11 +1115,23 @@
 
         // Initialize image slider when page loads
         document.addEventListener('DOMContentLoaded', () => {
+            // Ensure card starts with full opacity
+            const currentCard = document.getElementById('currentCard');
+            if (currentCard) {
+                currentCard.style.opacity = '1';
+                currentCard.style.setProperty('opacity', '1', 'important');
+            }
             window.initializeImageSlider();
         });
 
         // Also initialize when Livewire updates the content
         document.addEventListener('livewire:navigated', () => {
+            // Ensure card has full opacity after navigation
+            const currentCard = document.getElementById('currentCard');
+            if (currentCard) {
+                currentCard.style.opacity = '1';
+                currentCard.style.setProperty('opacity', '1', 'important');
+            }
             setTimeout(window.initializeImageSlider, 100);
         });
 
@@ -1110,10 +1139,17 @@
         document.addEventListener('livewire:updated', () => {
             const currentCard = document.getElementById('currentCard');
             if (currentCard) {
-                // Reset any card transformations
+                // Reset any card transformations and ensure full opacity
                 currentCard.style.transform = '';
                 currentCard.style.opacity = '1';
-                currentCard.classList.remove('removing');
+                currentCard.classList.remove('removing', 'dragging');
+                
+                // Force the card to be the first child (top of stack) with full opacity
+                currentCard.style.zIndex = '10';
+                currentCard.style.opacity = '1';
+                
+                // Ensure no CSS classes are interfering with opacity
+                currentCard.style.setProperty('opacity', '1', 'important');
             }
             // Re-initialize image slider for new product
             setTimeout(window.initializeImageSlider, 100);

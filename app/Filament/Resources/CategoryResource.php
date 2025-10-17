@@ -18,7 +18,10 @@ class CategoryResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';
     
-    protected static ?string $navigationGroup = 'Management';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.groups.management');
+    }
     
     protected static ?int $navigationSort = 1;
 

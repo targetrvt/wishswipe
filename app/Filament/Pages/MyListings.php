@@ -165,7 +165,7 @@ class MyListings extends Page implements HasForms, HasTable
                                 ->label(__('my_listings.form.price'))
                                 ->required()
                                 ->numeric()
-                                ->prefix('$'),
+                                ->prefix('€'),
                             
                             Forms\Components\Select::make('condition')
                                 ->label(__('my_listings.form.condition'))

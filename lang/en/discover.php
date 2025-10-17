@@ -37,6 +37,7 @@ return [
     'keyboard' => [
         'pass' => 'to pass',
         'add_to_cart' => 'to add to cart',
+        'navigate_images' => 'to navigate images',
     ],
     
     'loading' => [
@@ -59,5 +60,11 @@ return [
         'match_body' => 'You can now message each other',
         'error_title' => 'Oops!',
         'error_body' => 'Something went wrong. Please try again.',
+    ],
+
+    'empty_state' => [
+        'title' => 'Start Discovering Products',
+        'description' => 'Swipe through available items in your area',
+        'start_swiping' => 'Start Swiping',
     ],
 ];

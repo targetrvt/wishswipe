@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'navigation_label' => 'Dashboard',
+    
     'welcome_back' => 'Welcome back, :name',
     'welcome_subtitle' => "Here's what's happening with your marketplace today",
 
@@ -12,7 +14,7 @@ return [
         'of_total_listings' => 'of :total total listings',
         'avg_per_listing' => ':avg avg per listing',
         'conversion_rate' => ':rate% conversion rate',
-        'pending_amount' => '$:amount pending',
+        'pending_amount' => '€:amount pending',
     ],
 
     'top_products' => [
@@ -40,5 +42,26 @@ return [
         'manage_products' => 'Manage products',
         'new_listing' => 'New Listing',
         'create_product' => 'Create product',
+    ],
+
+    'my_listings' => [
+        'empty_state' => [
+            'create_first' => 'Create Your First Listing',
+        ],
+    ],
+
+    'quick_actions' => [
+        'create_first_listing' => [
+            'title' => 'Create Your First Listing',
+            'description' => 'Start selling by creating your first product',
+        ],
+        'unread_messages' => [
+            'title' => 'You Have Unread Messages',
+            'description' => 'Check your conversations to connect with buyers',
+        ],
+        'start_discovering' => [
+            'title' => 'Start Discovering Products',
+            'description' => 'Swipe through available items in your area',
+        ],
     ],
 ];

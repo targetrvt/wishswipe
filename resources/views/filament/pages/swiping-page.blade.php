@@ -60,6 +60,11 @@
             pointer-events: none;
         }
 
+        .swipe-card .image-navigation,
+        .swipe-card .image-dot {
+            pointer-events: auto;
+        }
+
         .swipe-card.dragging {
             cursor: grabbing;
             transition: none;
@@ -90,11 +95,140 @@
             opacity: 1;
         }
 
+        /* Ensure the current card always has full opacity */
+        #currentCard {
+            opacity: 1 !important;
+        }
+
         .card-image {
             width: 100%;
             height: 55%;
             object-fit: cover;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .image-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .image-slide.active {
+            opacity: 1;
+        }
+
+        .image-navigation {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+            font-size: 18px;
+            font-weight: bold;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .image-navigation:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .image-navigation.prev {
+            left: 10px;
+        }
+
+        .image-navigation.next {
+            right: 10px;
+        }
+
+        .card-image:hover .image-navigation {
+            opacity: 1;
+        }
+
+        /* Always show navigation arrows on both desktop and mobile */
+        .image-navigation {
+            opacity: 1 !important;
+        }
+
+        /* Mobile: Smaller size */
+        @media (max-width: 640px) {
+            .image-navigation {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+            
+            .image-navigation.prev {
+                left: 8px;
+            }
+            
+            .image-navigation.next {
+                right: 8px;
+            }
+        }
+
+        .image-dots {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .image-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: background 0.3s ease;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .image-dot.active {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .user-name {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            z-index: 10;
         }
 
         .card-content {
@@ -437,6 +571,24 @@
             .keyboard-hint {
                 display: none;
             }
+
+            .image-dot {
+                width: 6px;
+                height: 6px;
+            }
+
+            .user-name {
+                font-size: 0.75rem;
+                padding: 4px 8px;
+                bottom: 10px;
+                left: 10px;
+            }
+
+            .user-name svg {
+                width: 12px;
+                height: 12px;
+                margin-right: 4px;
+            }
         }
 
         @media (prefers-color-scheme: dark) {
@@ -519,15 +671,52 @@
                     @php
                         $hasImage = !empty($currentProduct['images']) && is_array($currentProduct['images']) && isset($currentProduct['images'][0]) && $currentProduct['images'][0];
                         $imageUrl = $hasImage ? Storage::url($currentProduct['images'][0]) : '';
+                        $hasImages = !empty($currentProduct['images']) && count($currentProduct['images']) > 0;
+                        $imageCount = $hasImages ? count($currentProduct['images']) : 0;
                     @endphp
-                    <div class="card-image" style="background-image: url('{{ $imageUrl }}'); background-size: cover; background-position: center;">
-                        @if(!$hasImage)
-                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: rgba(255,255,255,0.5);">
-                                <svg style="width: 80px; height: 80px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                        @endif
+                    <div class="card-image">
+                        <div class="image-container">
+                            @if($hasImages)
+                                @foreach($currentProduct['images'] as $index => $image)
+                                    <div class="image-slide {{ $index === 0 ? 'active' : '' }}" 
+                                         style="background-image: url('{{ Storage::url($image) }}');"
+                                         data-index="{{ $index }}">
+                                    </div>
+                                @endforeach
+                                
+                                @if($imageCount > 1)
+                                    <button class="image-navigation prev">
+                                        ‹
+                                    </button>
+                                    <button class="image-navigation next">
+                                        ›
+                                    </button>
+                                    
+                                    <div class="image-dots">
+                                        @for($i = 0; $i < $imageCount; $i++)
+                                            <div class="image-dot {{ $i === 0 ? 'active' : '' }}" 
+                                                 data-index="{{ $i }}">
+                                            </div>
+                                        @endfor
+                                    </div>
+                                @endif
+                            @else
+                                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: rgba(255,255,255,0.5);">
+                                    <svg style="width: 80px; height: 80px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                            @endif
+                            
+                            @if($currentProduct['user']['name'])
+                                <div class="user-name">
+                                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: inline-block; margin-right: 6px; vertical-align: middle;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    {{ $currentProduct['user']['name'] }}
+                                </div>
+                            @endif
+                        </div>
                         
                         <div style="position: absolute; top: 1rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
                             <span class="card-badge" style="background: rgba(255, 255, 255, 0.95); color: #1f2937; backdrop-filter: blur(10px);">
@@ -556,7 +745,7 @@
                             @endif
                             
                             <div class="card-info">
-                                <span class="card-price">${{ number_format($currentProduct['price'], 2) }}</span>
+                                <span class="card-price">€{{ number_format($currentProduct['price'], 2) }}</span>
                                 @if($currentProduct['location'])
                                     <span style="font-size: 0.875rem; color: #6b7280; display: flex; align-items: center; gap: 0.25rem;">
                                         <svg style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -613,6 +802,9 @@
                 {{ __('discover.keyboard.pass') }}  •
                 <kbd>→</kbd>
                 {{ __('discover.keyboard.add_to_cart') }}
+                @if($imageCount > 1)
+                    • <kbd>↑</kbd>/<kbd>↓</kbd> {{ __('discover.keyboard.navigate_images') }}
+                @endif
             </div>
         @else
             <div class="loading-state">
@@ -643,6 +835,7 @@
             currentX: 0,
             currentY: 0,
             isDragging: false,
+            hasMoved: false,
             card: null,
 
             init() {
@@ -669,6 +862,7 @@
                 }
                 
                 this.isDragging = true;
+                this.hasMoved = false;
                 this.card.classList.add('dragging');
 
                 const touch = e.type.includes('touch') ? e.touches[0] : e;
@@ -684,6 +878,11 @@
                 const touch = e.type.includes('touch') ? e.touches[0] : e;
                 this.currentX = touch.clientX - this.startX;
                 this.currentY = touch.clientY - this.startY;
+                
+                // Mark that we've moved if there's any significant movement
+                if (Math.abs(this.currentX) > 5 || Math.abs(this.currentY) > 5) {
+                    this.hasMoved = true;
+                }
 
                 const constrainedY = this.currentY * 0.2;
 
@@ -716,11 +915,15 @@
 
                 const threshold = 150;
 
-                if (Math.abs(this.currentX) > threshold) {
+                // Only trigger swipe if there was actual movement and it exceeds threshold
+                if (this.hasMoved && Math.abs(this.currentX) > threshold) {
                     this.completeSwipe(this.currentX > 0 ? 'right' : 'left');
                 } else {
                     this.resetCard();
                 }
+
+                // Reset movement flag
+                this.hasMoved = false;
 
                 document.getElementById('nopeIndicator').classList.remove('active');
                 document.getElementById('likeIndicator').classList.remove('active');
@@ -743,7 +946,7 @@
                     } else {
                         $wire.call('swipeLeft');
                     }
-                    this.resetCard();
+                    // Don't reset the card - let Livewire handle the new card
                 }, 400);
             },
 
@@ -756,8 +959,10 @@
                 
                 this.card.style.transform = '';
                 this.card.style.opacity = '1';
+                this.card.style.setProperty('opacity', '1', 'important');
                 this.currentX = 0;
                 this.currentY = 0;
+                this.card.classList.remove('removing');
             },
 
             setupKeyboard() {
@@ -768,13 +973,188 @@
                     } else if (e.key === 'ArrowRight') {
                         e.preventDefault();
                         this.swipeCard('right');
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        this.handleImageNavigation(-1);
+                    } else if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        this.handleImageNavigation(1);
                     }
                 });
+            },
+
+            handleImageNavigation(direction) {
+                // Use the global JavaScript function
+                window.changeImage(direction);
             }
         }));
 
+        // Simple JavaScript functions for image navigation
+        window.currentImageIndex = 0;
+        window.totalImages = 0;
+
+        window.initializeImageSlider = function() {
+            const currentCard = document.getElementById('currentCard');
+            if (!currentCard) return;
+            
+            const imageSlides = currentCard.querySelectorAll('.image-slide');
+            window.totalImages = imageSlides.length;
+            window.currentImageIndex = 0;
+            console.log('Image slider initialized with', window.totalImages, 'images');
+            
+            // Add click event listeners for debugging and proper event handling
+            const prevButton = currentCard.querySelector('.image-navigation.prev');
+            const nextButton = currentCard.querySelector('.image-navigation.next');
+            const dots = currentCard.querySelectorAll('.image-dot');
+            
+            if (prevButton) {
+                prevButton.addEventListener('click', (e) => {
+                    console.log('Prev button clicked!');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.changeImage(-1);
+                });
+                
+                // Also add touch events for mobile
+                prevButton.addEventListener('touchstart', (e) => {
+                    console.log('Prev button touched!');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.changeImage(-1);
+                });
+            }
+            
+            if (nextButton) {
+                nextButton.addEventListener('click', (e) => {
+                    console.log('Next button clicked!');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.changeImage(1);
+                });
+                
+                // Also add touch events for mobile
+                nextButton.addEventListener('touchstart', (e) => {
+                    console.log('Next button touched!');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.changeImage(1);
+                });
+            }
+            
+            // Add event listeners for dots
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', (e) => {
+                    console.log('Dot clicked:', index);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.goToImage(index);
+                });
+                
+                // Also add touch events for mobile
+                dot.addEventListener('touchstart', (e) => {
+                    console.log('Dot touched:', index);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.goToImage(index);
+                });
+            });
+        }
+
+        window.changeImage = function(direction) {
+            console.log('changeImage called with direction:', direction, 'totalImages:', window.totalImages);
+            if (window.totalImages <= 1) {
+                console.log('Only 1 image, not changing');
+                return;
+            }
+
+            const newIndex = window.currentImageIndex + direction;
+            console.log('Calculated new index:', newIndex);
+            
+            if (newIndex >= 0 && newIndex < window.totalImages) {
+                window.goToImage(newIndex);
+            } else if (newIndex < 0) {
+                window.goToImage(window.totalImages - 1);
+            } else if (newIndex >= window.totalImages) {
+                window.goToImage(0);
+            }
+        }
+
+        window.goToImage = function(index) {
+            console.log('goToImage called with index:', index, 'currentIndex:', window.currentImageIndex);
+            if (window.totalImages <= 1 || index < 0 || index >= window.totalImages) return;
+
+            const currentCard = document.getElementById('currentCard');
+            if (!currentCard) return;
+            
+            const imageSlides = currentCard.querySelectorAll('.image-slide');
+            const dots = currentCard.querySelectorAll('.image-dot');
+
+            console.log('Found slides:', imageSlides.length, 'dots:', dots.length);
+
+            // Remove active class from current image and dot
+            if (imageSlides[window.currentImageIndex]) {
+                imageSlides[window.currentImageIndex].classList.remove('active');
+            }
+            if (dots[window.currentImageIndex]) {
+                dots[window.currentImageIndex].classList.remove('active');
+            }
+
+            // Add active class to new image and dot
+            if (imageSlides[index]) {
+                imageSlides[index].classList.add('active');
+            }
+            if (dots[index]) {
+                dots[index].classList.add('active');
+            }
+
+            window.currentImageIndex = index;
+            console.log('New currentIndex:', window.currentImageIndex);
+        }
+
         window.addEventListener('show-match-notification', () => {
             window.dispatchEvent(new CustomEvent('show-match'));
+        });
+
+        // Initialize image slider when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ensure card starts with full opacity
+            const currentCard = document.getElementById('currentCard');
+            if (currentCard) {
+                currentCard.style.opacity = '1';
+                currentCard.style.setProperty('opacity', '1', 'important');
+            }
+            window.initializeImageSlider();
+        });
+
+        // Also initialize when Livewire updates the content
+        document.addEventListener('livewire:navigated', () => {
+            // Ensure card has full opacity after navigation
+            const currentCard = document.getElementById('currentCard');
+            if (currentCard) {
+                currentCard.style.opacity = '1';
+                currentCard.style.setProperty('opacity', '1', 'important');
+            }
+            setTimeout(window.initializeImageSlider, 100);
+        });
+
+        // Reset card state when Livewire updates
+        document.addEventListener('livewire:updated', () => {
+            const currentCard = document.getElementById('currentCard');
+            if (currentCard) {
+                // Reset any card transformations and ensure full opacity
+                currentCard.style.transform = '';
+                currentCard.style.opacity = '1';
+                currentCard.classList.remove('removing', 'dragging');
+                
+                // Force the card to be the first child (top of stack) with full opacity
+                currentCard.style.zIndex = '10';
+                currentCard.style.opacity = '1';
+                
+                // Ensure no CSS classes are interfering with opacity
+                currentCard.style.setProperty('opacity', '1', 'important');
+            }
+            // Re-initialize image slider for new product
+            setTimeout(window.initializeImageSlider, 100);
         });
     </script>
     @endscript

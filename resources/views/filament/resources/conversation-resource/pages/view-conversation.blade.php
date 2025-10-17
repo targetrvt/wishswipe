@@ -19,7 +19,7 @@
                 </div>
                 <div class="text-right">
                     <p class="text-lg font-bold text-primary-600 dark:text-primary-400">
-                        ${{ number_format($record->product->price, 2) }}
+                        €{{ number_format($record->product->price, 2) }}
                     </p>
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                         {{ ucfirst($record->product->status) }}

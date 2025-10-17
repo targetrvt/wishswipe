@@ -514,7 +514,7 @@
         <!-- Conversations Sidebar -->
         <div class="conversations-sidebar" x-data="{ mobileVisible: true }">
             <div class="sidebar-header">
-                <h2 class="sidebar-title">Messages</h2>
+                <h2 class="sidebar-title">{{ __('conversations.sidebar.title') }}</h2>
             </div>
 
             <div class="conversations-list">
@@ -552,7 +552,7 @@
                                 </p>
                             @else
                                 <p class="conversation-preview" style="font-style: italic;">
-                                    Start the conversation
+                                    {{ __('conversations.conversation.start_conversation') }}
                                 </p>
                             @endif
                         </div>
@@ -563,8 +563,8 @@
                             <svg class="empty-state-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                             </svg>
-                            <h3 class="empty-state-title">No conversations</h3>
-                            <p class="empty-state-description">Match with sellers to start chatting</p>
+                            <h3 class="empty-state-title">{{ __('conversations.empty_states.no_conversations') }}</h3>
+                            <p class="empty-state-description">{{ __('conversations.empty_states.no_conversations_description') }}</p>
                         </div>
                     </div>
                 @endforelse
@@ -599,7 +599,7 @@
 
                     <div class="chat-header-right">
                         <span class="product-price">
-                            ${{ number_format($this->selectedConversation->product->price, 2) }}
+                            €{{ number_format($this->selectedConversation->product->price, 2) }}
                         </span>
                     </div>
                 </div>
@@ -658,8 +658,8 @@
                                 <svg class="empty-state-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                 </svg>
-                                <h3 class="empty-state-title">No messages yet</h3>
-                                <p class="empty-state-description">Send a message to start the conversation</p>
+                                <h3 class="empty-state-title">{{ __('conversations.empty_states.no_messages') }}</h3>
+                                <p class="empty-state-description">{{ __('conversations.empty_states.no_messages_description') }}</p>
                             </div>
                         </div>
                     @endforelse
@@ -670,7 +670,7 @@
                         <textarea
                             wire:model="messageContent"
                             class="message-textarea"
-                            placeholder="Type a message..."
+                            placeholder="{{ __('conversations.conversation.type_message') }}"
                             rows="1"
                             x-data="{ 
                                 resize() { 
@@ -705,8 +705,8 @@
                         <svg class="empty-state-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
-                        <h3 class="empty-state-title">Select a conversation</h3>
-                        <p class="empty-state-description">Choose a conversation to view messages</p>
+                        <h3 class="empty-state-title">{{ __('conversations.empty_states.select_conversation') }}</h3>
+                        <p class="empty-state-description">{{ __('conversations.empty_states.select_conversation_description') }}</p>
                     </div>
                 </div>
             </div>

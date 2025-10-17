@@ -20,8 +20,21 @@ class ProductResource extends Resource
     protected static ?string $model = Product::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-cube';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('listings.navigation_label');
+    }
+     
+    public static function getPluralModelLabel(): string
+    {
+        return __('listings.navigation_label');
+    }
     
-    protected static ?string $navigationGroup = 'Marketplace';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.groups.marketplace');
+    }
     
     protected static ?int $navigationSort = 1;
     
@@ -31,61 +44,58 @@ class ProductResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Product Information')
-                    ->description('Enter the basic information about your product')
+                Forms\Components\Section::make(__('listings.filament.product_information'))
+                    ->description(__('listings.filament.product_information_description'))
                     ->schema([
                         Forms\Components\TextInput::make('title')
+                            ->label(__('listings.form.title'))
                             ->required()
                             ->maxLength(255)
-                            ->placeholder('e.g., iPhone 13 Pro Max')
+                            ->placeholder(__('listings.filament.title_placeholder'))
                             ->columnSpanFull()
                             ->live(onBlur: true),
                         
                         Forms\Components\Textarea::make('description')
+                            ->label(__('listings.form.description'))
                             ->required()
                             ->rows(5)
-                            ->placeholder('Provide a detailed description of your product...')
+                            ->placeholder(__('listings.filament.description_placeholder'))
                             ->columnSpanFull()
-                            ->helperText('Be specific about condition, features, and any defects'),
+                            ->helperText(__('listings.filament.description_helper')),
                         
                         Forms\Components\Select::make('category_id')
-                            ->label('Category')
+                            ->label(__('listings.form.category'))
                             ->options(fn () => Category::where('is_active', true)->pluck('name', 'id'))
                             ->required(),
                         
                         Forms\Components\TextInput::make('price')
+                            ->label(__('listings.form.price'))
                             ->required()
                             ->numeric()
-                            ->prefix('$')
+                            ->prefix('€')
                             ->minValue(0.01)
                             ->maxValue(999999.99)
                             ->step(0.01)
-                            ->placeholder('0.00')
-                            ->helperText('Set a competitive price'),
+                            ->placeholder(__('listings.filament.price_placeholder'))
+                            ->helperText(__('listings.filament.price_helper')),
                         
                         Forms\Components\Select::make('condition')
-                            ->options([
-                                'new' => 'New',
-                                'like_new' => 'Like New',
-                                'used' => 'Used',
-                            ])
+                            ->label(__('listings.form.condition'))
+                            ->options(__('listings.filament.condition_options'))
                             ->required()
                             ->default('new'),
                         
                         Forms\Components\Select::make('status')
-                            ->options([
-                                'available' => 'Available',
-                                'reserved' => 'Reserved',
-                                'sold' => 'Sold',
-                            ])
+                            ->label(__('listings.form.status'))
+                            ->options(__('listings.filament.status_options'))
                             ->required()
                             ->default('available'),
                     ])
                     ->columns(2)
                     ->collapsible(),
                 
-                Forms\Components\Section::make('Location & Address')
-                    ->description('Set your product location to help buyers find it')
+                Forms\Components\Section::make(__('listings.form.location'))
+                    ->description(__('listings.filament.location_helper'))
                     ->schema([
                         Geocomplete::make('location')
                             ->label('Location Description')
@@ -98,9 +108,14 @@ class ProductResource extends Resource
                             ])
                             ->countries(['us', 'gb', 'lv'])
                             ->placeholder('e.g., Riga, Latvia')
+                        Forms\Components\TextInput::make('location')
+                            ->label(__('listings.form.location'))
+                            ->maxLength(255)
+                            ->placeholder(__('listings.filament.location_placeholder'))
                             ->columnSpanFull(),
                         
                         Map::make('coordinates')
+                            ->label(__('listings.filament.map_label'))
                             ->mapControls([
                                 'mapTypeControl' => true,
                                 'scaleControl' => true,
@@ -121,7 +136,7 @@ class ProductResource extends Resource
                             ->draggable()
                             ->clickable()
                             ->geolocate()
-                            ->geolocateLabel('📍 Get My Location')
+                            ->geolocateLabel(__('listings.filament.geolocate_label'))
                             ->geolocateOnLoad(false, false)
                             ->columnSpanFull()
                             ->reactive()
@@ -133,18 +148,18 @@ class ProductResource extends Resource
                                     $set('longitude', $lng);
                                 }
                             })
-                            ->helperText('Click on the map to set your location, or use the search box and "Get My Location" button'),
+                            ->helperText(__('listings.filament.map_helper')),
                         
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('latitude')
-                                    ->label('Latitude')
+                                    ->label(__('listings.filament.latitude_label'))
                                     ->numeric()
                                     ->step(0.0001)
                                     ->minValue(-90)
                                     ->maxValue(90)
                                     ->rule('regex:/^-?\\d{1,2}\\.\\d{1,4}$/')
-                                    ->placeholder('56.9496')
+                                    ->placeholder(__('listings.filament.latitude_placeholder'))
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $get, callable $set) {
                                         $rounded = is_numeric($state) ? round((float) $state, 4) : null;
@@ -159,16 +174,16 @@ class ProductResource extends Resource
                                             ]);
                                         }
                                     })
-                                    ->helperText('Automatically set when using map'),
+                                    ->helperText(__('listings.filament.coordinates_helper')),
                                 
                                 Forms\Components\TextInput::make('longitude')
-                                    ->label('Longitude')
+                                    ->label(__('listings.filament.longitude_label'))
                                     ->numeric()
                                     ->step(0.0001)
                                     ->minValue(-180)
                                     ->maxValue(180)
                                     ->rule('regex:/^-?\\d{1,3}\\.\\d{1,4}$/')
-                                    ->placeholder('24.1052')
+                                    ->placeholder(__('listings.filament.longitude_placeholder'))
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $get, callable $set) {
                                         $rounded = is_numeric($state) ? round((float) $state, 4) : null;
@@ -183,16 +198,17 @@ class ProductResource extends Resource
                                             ]);
                                         }
                                     })
-                                    ->helperText('Automatically set when using map'),
+                                    ->helperText(__('listings.filament.coordinates_helper')),
                             ]),
                     ])
                     ->collapsible()
                     ->collapsed(false),
                 
-                Forms\Components\Section::make('Product Images')
-                    ->description('Upload up to 5 high-quality images')
+                Forms\Components\Section::make(__('listings.filament.images_section'))
+                    ->description(__('listings.filament.images_description'))
                     ->schema([
                         Forms\Components\FileUpload::make('images')
+                            ->label(__('listings.form.images'))
                             ->multiple()
                             ->image()
                             ->maxFiles(5)
@@ -204,7 +220,7 @@ class ProductResource extends Resource
                                 '16:9',
                             ])
                             ->maxSize(5120)
-                            ->helperText('Recommended: Square images, at least 800x800px')
+                            ->helperText(__('listings.filament.images_helper'))
                             ->columnSpanFull()
                             ->reorderable()
                             ->appendFiles()
@@ -213,24 +229,24 @@ class ProductResource extends Resource
                     ])
                     ->collapsible(),
                 
-                Forms\Components\Section::make('Settings')
+                Forms\Components\Section::make(__('listings.filament.visibility_section'))
                     ->schema([
                         Forms\Components\Toggle::make('is_active')
                             ->default(true)
-                            ->label('Active Listing')
-                            ->helperText('Inactive listings won\'t appear in search results')
+                            ->label(__('listings.form.active'))
+                            ->helperText(__('listings.filament.active_helper'))
                             ->inline(false),
                         
                         Forms\Components\Hidden::make('user_id')
                             ->default(fn () => auth()->id()),
                         
                         Forms\Components\Placeholder::make('created_at')
-                            ->label('Created')
+                            ->label(__('listings.filament.created_label'))
                             ->content(fn ($record) => $record?->created_at?->diffForHumans() ?? '-')
                             ->hidden(fn ($record) => $record === null),
                         
                         Forms\Components\Placeholder::make('view_count')
-                            ->label('Total Views')
+                            ->label(__('listings.filament.total_views_label'))
                             ->content(fn ($record) => number_format($record?->view_count ?? 0))
                             ->hidden(fn ($record) => $record === null),
                     ])
@@ -243,7 +259,7 @@ class ProductResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('images')
-                    ->label('Image')
+                    ->label(__('listings.columns.image'))
                     ->circular()
                     ->stacked()
                     ->limit(1)
@@ -251,46 +267,51 @@ class ProductResource extends Resource
                     ->getStateUsing(fn ($record) => $record->first_image),
                 
                 Tables\Columns\TextColumn::make('title')
+                    ->label(__('listings.columns.title'))
                     ->searchable()
                     ->sortable()
                     ->limit(30)
                     ->weight('bold')
-                    ->description(fn ($record) => $record->category->name ?? 'Uncategorized'),
+                    ->description(fn ($record) => $record->category->name ?? __('listings.modal.uncategorized')),
                 
                 Tables\Columns\TextColumn::make('price')
+                    ->label(__('listings.columns.price'))
                     ->money('USD')
                     ->sortable()
                     ->weight('bold')
                     ->color('success'),
                 
                 Tables\Columns\BadgeColumn::make('condition')
+                    ->label(__('listings.columns.condition'))
                     ->colors([
                         'success' => 'new',
                         'info' => 'like_new',
                         'warning' => 'used',
                     ])
-                    ->formatStateUsing(fn ($state) => ucfirst(str_replace('_', ' ', $state))),
+                    ->formatStateUsing(fn ($state) => __('listings.condition.' . $state)),
                 
                 Tables\Columns\BadgeColumn::make('status')
+                    ->label(__('listings.columns.status'))
                     ->colors([
                         'success' => 'available',
                         'warning' => 'reserved',
                         'danger' => 'sold',
                     ])
-                    ->formatStateUsing(fn ($state) => ucfirst($state)),
+                    ->formatStateUsing(fn ($state) => __('listings.status.' . $state)),
                 
                 Tables\Columns\IconColumn::make('is_active')
+                    ->label(__('listings.columns.active'))
                     ->boolean()
-                    ->label('Active')
                     ->sortable(),
                 
                 Tables\Columns\TextColumn::make('view_count')
-                    ->label('Views')
+                    ->label(__('listings.columns.views'))
                     ->sortable()
                     ->alignCenter()
                     ->icon('heroicon-m-eye'),
                 
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('listings.columns.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->since()
@@ -298,43 +319,40 @@ class ProductResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('category')
+                    ->label(__('listings.filters.category'))
                     ->relationship('category', 'name')
                     ->preload()
                     ->multiple(),
                 
                 Tables\Filters\SelectFilter::make('condition')
-                    ->options([
-                        'new' => 'New',
-                        'like_new' => 'Like New',
-                        'used' => 'Used',
-                    ])
+                    ->label(__('listings.form.condition'))
+                    ->options(__('listings.filament.condition_options'))
                     ->multiple(),
                 
                 Tables\Filters\SelectFilter::make('status')
-                    ->options([
-                        'available' => 'Available',
-                        'reserved' => 'Reserved',
-                        'sold' => 'Sold',
-                    ])
+                    ->label(__('listings.filters.status'))
+                    ->options(__('listings.filament.status_options'))
                     ->multiple(),
                 
                 Tables\Filters\TernaryFilter::make('is_active')
-                    ->label('Active Status')
-                    ->placeholder('All products')
-                    ->trueLabel('Active only')
-                    ->falseLabel('Inactive only'),
+                    ->label(__('listings.filament.active_label'))
+                    ->placeholder(__('listings.all_listings'))
+                    ->trueLabel(__('listings.status.available'))
+                    ->falseLabel(__('listings.status.sold')),
                 
                 Tables\Filters\Filter::make('has_images')
-                    ->label('Has Images')
+                    ->label(__('listings.filament.has_images_label'))
                     ->query(fn (Builder $query): Builder => $query->whereNotNull('images')),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\ViewAction::make()
+                        ->label(__('listings.actions.view')),
+                    Tables\Actions\EditAction::make()
+                        ->label(__('listings.actions.edit')),
                     
                     Tables\Actions\Action::make('mark_sold')
-                        ->label('Mark as Sold')
+                        ->label(__('listings.filament.mark_sold_label'))
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->requiresConfirmation()
@@ -343,12 +361,12 @@ class ProductResource extends Resource
                             $record->update(['status' => 'sold']);
                             Notification::make()
                                 ->success()
-                                ->title('Product marked as sold')
+                                ->title(__('listings.filament.product_marked_sold'))
                                 ->send();
                         }),
                     
                     Tables\Actions\Action::make('mark_available')
-                        ->label('Mark as Available')
+                        ->label(__('listings.filament.mark_available_label'))
                         ->icon('heroicon-o-arrow-path')
                         ->color('info')
                         ->requiresConfirmation()
@@ -357,12 +375,12 @@ class ProductResource extends Resource
                             $record->update(['status' => 'available']);
                             Notification::make()
                                 ->success()
-                                ->title('Product marked as available')
+                                ->title(__('listings.filament.product_marked_available'))
                                 ->send();
                         }),
                     
                     Tables\Actions\Action::make('toggle_active')
-                        ->label(fn ($record) => $record->is_active ? 'Deactivate' : 'Activate')
+                        ->label(fn ($record) => $record->is_active ? __('listings.filament.deactivate_label') : __('listings.filament.activate_label'))
                         ->icon(fn ($record) => $record->is_active ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
                         ->color(fn ($record) => $record->is_active ? 'warning' : 'success')
                         ->requiresConfirmation()
@@ -370,51 +388,53 @@ class ProductResource extends Resource
                             $record->update(['is_active' => !$record->is_active]);
                             Notification::make()
                                 ->success()
-                                ->title('Product updated')
+                                ->title(__('listings.filament.product_updated'))
                                 ->send();
                         }),
                     
-                    Tables\Actions\DeleteAction::make(),
+                    Tables\Actions\DeleteAction::make()
+                        ->label(__('listings.actions.delete')),
                 ])->icon('heroicon-m-ellipsis-vertical')
                 ->button()
-                ->label('Actions'),
+                ->label(__('listings.filament.actions_label')),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\BulkAction::make('mark_available')
-                        ->label('Mark as Available')
+                        ->label(__('listings.filament.bulk_mark_available_label'))
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->requiresConfirmation()
                         ->action(fn ($records) => $records->each->update(['status' => 'available'])),
                     
                     Tables\Actions\BulkAction::make('mark_sold')
-                        ->label('Mark as Sold')
+                        ->label(__('listings.filament.bulk_mark_sold_label'))
                         ->icon('heroicon-o-x-circle')
                         ->color('danger')
                         ->requiresConfirmation()
                         ->action(fn ($records) => $records->each->update(['status' => 'sold'])),
                     
                     Tables\Actions\BulkAction::make('activate')
-                        ->label('Activate')
+                        ->label(__('listings.filament.bulk_activate_label'))
                         ->icon('heroicon-o-eye')
                         ->color('success')
                         ->requiresConfirmation()
                         ->action(fn ($records) => $records->each->update(['is_active' => true])),
                     
                     Tables\Actions\BulkAction::make('deactivate')
-                        ->label('Deactivate')
+                        ->label(__('listings.filament.bulk_deactivate_label'))
                         ->icon('heroicon-o-eye-slash')
                         ->color('warning')
                         ->requiresConfirmation()
                         ->action(fn ($records) => $records->each->update(['is_active' => false])),
                     
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->label(__('listings.actions.delete')),
                 ]),
             ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make()
-                    ->label('Create your first product')
+                    ->label(__('listings.filament.create_first_product'))
                     ->icon('heroicon-m-plus')
                     ->button(),
             ])

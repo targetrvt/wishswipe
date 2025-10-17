@@ -90,13 +90,13 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between mb-4">
                 <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                    <x-heroicon-o-currency-dollar class="w-6 h-6 text-green-600 dark:text-green-400" />
+                    <x-heroicon-o-currency-euro class="w-6 h-6 text-green-600 dark:text-green-400" />
                 </div>
                 <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('dashboard.metrics.revenue') }}</span>
             </div>
             <div class="space-y-1">
                 <div class="text-3xl font-bold text-gray-900 dark:text-white">
-                    ${{ number_format($overview['revenue']['total'], 0) }}
+                    €{{ number_format($overview['revenue']['total'], 0) }}
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                     {{ __('dashboard.metrics.pending_amount', ['amount' => number_format($overview['revenue']['pending'], 0)]) }}
@@ -126,7 +126,7 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <h3 class="font-medium text-gray-900 dark:text-white truncate">{{ $product['title'] }}</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">${{ number_format($product['price'], 2) }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">€{{ number_format($product['price'], 2) }}</p>
                         </div>
                         <div class="flex items-center gap-4 text-sm">
                             <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">

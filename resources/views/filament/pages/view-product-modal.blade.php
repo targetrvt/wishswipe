@@ -2,7 +2,7 @@
     {{-- Product Images --}}
     @if($record->images && count($record->images) > 0)
         <div>
-            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Images</h3>
+            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('listings.modal.images') }}</h3>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
                 @foreach($record->images as $image)
                     <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
@@ -18,23 +18,23 @@
     {{-- Product Details --}}
     <div class="grid grid-cols-2 gap-4">
         <div>
-            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Price</dt>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('listings.modal.price') }}</dt>
             <dd class="mt-1 text-xl font-bold text-green-600 dark:text-green-400">
-                ${{ number_format($record->price, 2) }}
+                €{{ number_format($record->price, 2) }}
             </dd>
         </div>
 
         <div>
-            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Category</dt>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('listings.modal.category') }}</dt>
             <dd class="mt-1">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                    {{ $record->category->name ?? 'Uncategorized' }}
+                    {{ $record->category->name ?? __('listings.modal.uncategorized') }}
                 </span>
             </dd>
         </div>
 
         <div>
-            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Condition</dt>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('listings.modal.condition') }}</dt>
             <dd class="mt-1">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                     @if($record->condition === 'new') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
@@ -47,7 +47,7 @@
         </div>
 
         <div>
-            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</dt>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('listings.modal.status') }}</dt>
             <dd class="mt-1">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                     @if($record->status === 'available') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
@@ -61,7 +61,7 @@
 
         @if($record->location)
         <div>
-            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Location</dt>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('listings.modal.location') }}</dt>
             <dd class="mt-1 text-sm text-gray-900 dark:text-white flex items-center gap-1">
                 <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -73,7 +73,7 @@
         @endif
 
         <div>
-            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Views</dt>
+            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('listings.modal.views') }}</dt>
             <dd class="mt-1 text-sm text-gray-900 dark:text-white flex items-center gap-1">
                 <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -86,7 +86,7 @@
 
     {{-- Description --}}
     <div>
-        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Description</dt>
+        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">{{ __('listings.modal.description') }}</dt>
         <dd class="text-sm text-gray-900 dark:text-white whitespace-pre-line bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
             {{ $record->description }}
         </dd>
@@ -95,7 +95,7 @@
     {{-- Metadata --}}
     <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-            <span>Created: {{ $record->created_at->format('M d, Y') }}</span>
+            <span>{{ __('listings.modal.created') }}: {{ $record->created_at->format('M d, Y') }}</span>
             <span>{{ $record->created_at->diffForHumans() }}</span>
         </div>
     </div>

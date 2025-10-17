@@ -49,6 +49,7 @@ class AppPanelProvider extends PanelProvider
             ->font('Poppins')
             ->navigationGroups([
                 'Overview',
+                'Marketplace',
                 'Management',
             ])
             ->favicon(url('images/wishSwipe_logo.png'))

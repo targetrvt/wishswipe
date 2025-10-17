@@ -17,7 +17,10 @@ class MessageResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-envelope';
     
-    protected static ?string $navigationGroup = 'Management';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.groups.management');
+    }
     
     protected static ?int $navigationSort = 6;
     

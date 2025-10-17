@@ -107,7 +107,7 @@ class ProductResource extends Resource
                                 'country' => '%c',
                             ])
                             ->countries(['us', 'gb', 'lv'])
-                            ->placeholder('e.g., Riga, Latvia')
+                            ->placeholder('e.g., Riga, Latvia'),
                         Forms\Components\TextInput::make('location')
                             ->label(__('listings.form.location'))
                             ->maxLength(255)

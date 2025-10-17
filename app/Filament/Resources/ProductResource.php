@@ -97,7 +97,7 @@ class ProductResource extends Resource
                 Forms\Components\Section::make(__('listings.form.location'))
                     ->description(__('listings.filament.location_helper'))
                     ->schema([
-                        Geocomplete::make('location')
+                        Geocomplete::make('location_address')
                             ->label('Location Description')
                             ->isLocation()
                             ->default([])

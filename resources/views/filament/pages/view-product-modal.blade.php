@@ -1,6 +1,6 @@
 <div class="space-y-4">
     {{-- Product Images --}}
-    @if($record->images && count($record->images) > 0)
+    @if($record->images && is_array($record->images) && count($record->images) > 0)
         <div>
             <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('listings.modal.images') }}</h3>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-2">

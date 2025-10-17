@@ -129,9 +129,9 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Product Details</h4>
             <div class="flex space-x-4">
-                @if($record->product->images)
+                @if($record->product->images && is_array($record->product->images) && count($record->product->images) > 0)
                     <img 
-                        src="{{ Storage::url($record->product->images[0]) }}" 
+                        src="{{ Storage::url($record->product->first_image) }}" 
                         alt="{{ $record->product->title }}"
                         class="w-24 h-24 rounded-lg object-cover"
                     >

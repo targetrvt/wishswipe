@@ -669,6 +669,8 @@
 
                 <div class="swipe-card" id="currentCard">
                     @php
+                        $hasImage = !empty($currentProduct['images']) && is_array($currentProduct['images']) && isset($currentProduct['images'][0]) && $currentProduct['images'][0];
+                        $imageUrl = $hasImage ? Storage::url($currentProduct['images'][0]) : '';
                         $hasImages = !empty($currentProduct['images']) && count($currentProduct['images']) > 0;
                         $imageCount = $hasImages ? count($currentProduct['images']) : 0;
                     @endphp

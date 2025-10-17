@@ -111,7 +111,7 @@ class Dashboard extends BaseDashboard
                     'price' => $product->price,
                     'views' => $product->view_count,
                     'likes' => $product->swipes()->where('direction', 'right')->count(),
-                    'image' => $product->images[0] ?? null,
+                    'image' => $product->first_image,
                 ];
             })
             ->toArray();

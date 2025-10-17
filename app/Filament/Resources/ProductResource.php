@@ -97,6 +97,17 @@ class ProductResource extends Resource
                 Forms\Components\Section::make(__('listings.form.location'))
                     ->description(__('listings.filament.location_helper'))
                     ->schema([
+                        Geocomplete::make('location')
+                            ->label('Location Description')
+                            ->isLocation()
+                            ->reverseGeocode([
+                                'city' => '%L',
+                                'zip' => '%z',
+                                'state' => '%A1',
+                                'country' => '%c',
+                            ])
+                            ->countries(['us', 'gb', 'lv'])
+                            ->placeholder('e.g., Riga, Latvia')
                         Forms\Components\TextInput::make('location')
                             ->label(__('listings.form.location'))
                             ->maxLength(255)
@@ -111,11 +122,13 @@ class ProductResource extends Resource
                                 'streetViewControl' => true,
                                 'rotateControl' => true,
                                 'fullscreenControl' => true,
-                                'searchBoxControl' => true,
+                                'searchBoxControl' => false,
                                 'zoomControl' => true,
                             ])
                             ->height(fn () => '450px')
                             ->defaultZoom(13)
+                            ->autocomplete('location')
+                            ->autocompleteReverse(true)
                             ->reverseGeocode([
                                 'location' => '%n %S, %L, %A1 %z',
                             ])
@@ -251,7 +264,7 @@ class ProductResource extends Resource
                     ->stacked()
                     ->limit(1)
                     ->defaultImageUrl(url('/images/placeholder.jpg'))
-                    ->getStateUsing(fn ($record) => $record->images[0] ?? null),
+                    ->getStateUsing(fn ($record) => $record->first_image),
                 
                 Tables\Columns\TextColumn::make('title')
                     ->label(__('listings.columns.title'))

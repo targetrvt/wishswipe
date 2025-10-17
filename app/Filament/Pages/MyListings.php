@@ -46,7 +46,7 @@ class MyListings extends Page implements HasForms, HasTable
                     ->circular()
                     ->stacked()
                     ->limit(1)
-                    ->getStateUsing(fn ($record) => $record->images[0] ?? null),
+                    ->getStateUsing(fn ($record) => $record->first_image),
                 
                 Tables\Columns\TextColumn::make('title')
                     ->label(__('listings.columns.title'))

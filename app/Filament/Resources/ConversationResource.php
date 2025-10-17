@@ -17,7 +17,10 @@ class ConversationResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
     
-    protected static ?string $navigationGroup = 'Management';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.groups.management');
+    }
     
     protected static ?int $navigationSort = 5;
     

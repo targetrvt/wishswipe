@@ -37,6 +37,7 @@ return [
     'keyboard' => [
         'pass' => 'lai izlaistu',
         'add_to_cart' => 'lai pievienotu grozam',
+        'navigate_images' => 'lai pārvietotos starp attēliem',
     ],
     
     'loading' => [
@@ -59,5 +60,11 @@ return [
         'match_body' => 'Tagad varat sūtīt ziņojumus viens otram',
         'error_title' => 'Ups!',
         'error_body' => 'Kaut kas nogāja greizi. Lūdzu, mēģiniet vēlreiz.',
+    ],
+
+    'empty_state' => [
+        'title' => 'Sāciet Atklāt Produktus',
+        'description' => 'Velciet cauri pieejamajiem priekšmetiem jūsu apkārtnē',
+        'start_swiping' => 'Sākt Vilkt',
     ],
 ];

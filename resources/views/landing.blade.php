@@ -399,7 +399,7 @@
                             <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop" alt="{{ __('messages.landing.hero.product') }}">
                             <div class="card-info">
                                 <h4>Apple Watch 11</h4>
-                                <p class="price">$1,299</p>
+                                <p class="price">€1,299</p>
                                 <p class="location">📍 {{ __('messages.landing.hero.away', ['distance' => '2km']) }}</p>
                             </div>
                         </div>
@@ -409,7 +409,7 @@
                             <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=300&fit=crop" alt="{{ __('messages.landing.hero.product') }}">
                             <div class="card-info">
                                 <h4>Nike Sneakers</h4>
-                                <p class="price">$89</p>
+                                <p class="price">€89</p>
                                 <p class="location">📍 {{ __('messages.landing.hero.away', ['distance' => '1km']) }}</p>
                             </div>
                         </div>
@@ -419,7 +419,7 @@
                             <img src="https://plus.unsplash.com/premium_photo-1669380425564-6e1a281a4d30?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8U2Ftc3VuZyUyMHR2fGVufDB8fDB8fHww" alt="Samsung TV">
                             <div class="card-info">
                                 <h4>Samsung TV</h4>
-                                <p class="price">$399</p>
+                                <p class="price">€399</p>
                                 <p class="location">📍 {{ __('messages.landing.hero.away', ['distance' => '3km']) }}</p>
                             </div>
                         </div>
@@ -429,7 +429,7 @@
                             <img src="https://images.unsplash.com/photo-1608354580875-30bd4168b351?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y29mZmVlJTIwbWFrZXJ8ZW58MHx8MHx8fDA%3D" alt="Coffee Maker">
                             <div class="card-info">
                                 <h4>Coffee Maker</h4>
-                                <p class="price">$45</p>
+                                <p class="price">€45</p>
                                 <p class="location">📍 {{ __('messages.landing.hero.away', ['distance' => '4km']) }}</p>
                             </div>
                         </div>
@@ -439,7 +439,7 @@
                             <img src="https://images.unsplash.com/photo-1534150034764-046bf225d3fa?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8bW91bnRhaW4lMjBiaWtlfGVufDB8fDB8fHww" alt="Mountain Bike">
                             <div class="card-info">
                                 <h4>Mountain Bike</h4>
-                                <p class="price">$250</p>
+                                <p class="price">€250</p>
                                 <p class="location">📍 {{ __('messages.landing.hero.away', ['distance' => '5km']) }}</p>
                             </div>
                         </div>
@@ -711,7 +711,7 @@
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD"
+            "priceCurrency": "EUR"
         }
     }
     </script>

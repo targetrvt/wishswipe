@@ -16,6 +16,11 @@ class Dashboard extends BaseDashboard
     protected static ?int $navigationSort = 0;
     protected static string $view = 'filament.pages.dashboard';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('dashboard.navigation_label');
+    }
+
     public function getWidgets(): array
     {
         return [];
@@ -138,8 +143,8 @@ class Dashboard extends BaseDashboard
 
         if ($metrics['listings']['active'] === 0) {
             $actions[] = [
-                'title' => 'Create Your First Listing',
-                'description' => 'Start selling by creating your first product',
+                'title' => __('dashboard.quick_actions.create_first_listing.title'),
+                'description' => __('dashboard.quick_actions.create_first_listing.description'),
                 'url' => route('filament.app.resources.products.create'),
                 'icon' => 'heroicon-o-plus-circle',
                 'color' => 'primary',
@@ -148,8 +153,8 @@ class Dashboard extends BaseDashboard
 
         if ($metrics['engagement']['matches'] > 0 && $this->getUnreadMessagesCount() > 0) {
             $actions[] = [
-                'title' => 'You Have Unread Messages',
-                'description' => 'Check your conversations to connect with buyers',
+                'title' => __('dashboard.quick_actions.unread_messages.title'),
+                'description' => __('dashboard.quick_actions.unread_messages.description'),
                 'url' => route('filament.app.pages.conversations-page'),
                 'icon' => 'heroicon-o-chat-bubble-left-right',
                 'color' => 'warning',
@@ -158,8 +163,8 @@ class Dashboard extends BaseDashboard
 
         if ($metrics['engagement']['swipes'] < 10) {
             $actions[] = [
-                'title' => 'Start Discovering Products',
-                'description' => 'Swipe through available items in your area',
+                'title' => __('dashboard.quick_actions.start_discovering.title'),
+                'description' => __('dashboard.quick_actions.start_discovering.description'),
                 'url' => route('filament.app.pages.swiping-page'),
                 'icon' => 'heroicon-o-hand-raised',
                 'color' => 'success',

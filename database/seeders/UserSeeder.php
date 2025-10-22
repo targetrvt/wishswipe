@@ -44,7 +44,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Admin User',
                 'password' => Hash::make('87654321'),
-                'avatar_url' => 'null',
+                'avatar_url' => null,
             ]
         );
 

@@ -9,6 +9,7 @@ use Jeffgreco13\FilamentBreezy\Traits\TwoFactorAuthenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Notifications\ResetPassword as ResetPasswordNotification;
 
 class User extends Authenticatable implements HasAvatar
 {
@@ -59,5 +60,16 @@ class User extends Authenticatable implements HasAvatar
 
         // Return a default avatar URL if none is set
         return $this->avatar_url ? "/" . $this->avatar_url: null;
+    }
+
+    /**
+     * Send the password reset notification using Filament's notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }

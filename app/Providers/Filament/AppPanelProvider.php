@@ -36,7 +36,7 @@ class AppPanelProvider extends PanelProvider
             ->id('app')
             ->path('app')
             ->login()
-            ->passwordReset()
+            ->passwordReset(\App\Filament\Pages\Auth\RequestPasswordReset::class)
             ->registration()
             ->colors([
                 'danger' => Color::Rose,

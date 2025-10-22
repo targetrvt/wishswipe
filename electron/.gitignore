@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build output
+dist/
+out/
+
+# Environment files
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Electron specific
+*.cache
+
+# Icon files - these are generated from the logo
+# Uncomment below to ignore them and regenerate each time:
+# build/*.ico
+# build/*.icns
+# build/icons/*.png
+
+# Keep documentation and config
+!build/icon-instructions.md
+!build/license.txt
+!build/entitlements.mac.plist
+

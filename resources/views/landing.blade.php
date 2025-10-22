@@ -24,7 +24,25 @@
     <meta property="twitter:image" content="{{ asset('images/og-image.jpg') }}">
 
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/wishSwipe_logo.png') }}">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    
+    <!-- iOS PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="WishSwipe">
+    
+    <!-- macOS/Safari PWA Support -->
+    <link rel="apple-touch-icon" href="{{ asset('images/wishSwipe_logo.png') }}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('images/wishSwipe_logo.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/wishSwipe_logo.png') }}">
+    <link rel="apple-touch-icon" sizes="167x167" href="{{ asset('images/wishSwipe_logo.png') }}">
+    
+    <!-- Android/Chrome PWA Support -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -582,6 +600,51 @@
         </div>
     </section>
 
+    <section class="download-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 80px 0; color: white;">
+        <div class="container" style="text-align: center;">
+            <h2 style="font-size: 2.5rem; margin-bottom: 20px; color: white;">📥 Get WishSwipe</h2>
+            <p style="font-size: 1.2rem; margin-bottom: 40px; opacity: 0.95;">Install on any device - Mac, Windows, Linux, iOS, or Android</p>
+            
+            <!-- Mac/iOS/PWA Instructions -->
+            <div style="background: rgba(255,255,255,0.1); border-radius: 16px; padding: 30px; margin-bottom: 40px; max-width: 800px; margin-left: auto; margin-right: auto;">
+                <h3 style="font-size: 1.5rem; margin-bottom: 20px;">🍎 Mac & iOS Users</h3>
+                <p style="margin-bottom: 15px;">Install directly from your browser - no download needed!</p>
+                <div style="text-align: left; max-width: 600px; margin: 20px auto; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px;">
+                    <p style="margin: 10px 0;"><strong>🖥️ Mac (Safari):</strong> Click Share → "Add to Dock"</p>
+                    <p style="margin: 10px 0;"><strong>🖥️ Mac (Chrome):</strong> Click install icon in address bar</p>
+                    <p style="margin: 10px 0;"><strong>📱 iPhone/iPad:</strong> Tap Share → "Add to Home Screen"</p>
+                </div>
+                <p style="font-size: 14px; opacity: 0.9; margin-top: 15px;">Works on all browsers • No App Store required • Instant updates</p>
+            </div>
+            
+            <h3 style="font-size: 1.5rem; margin-bottom: 20px;">🐧 Linux Desktop Apps</h3>
+            
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; max-width: 800px; margin: 0 auto;">
+                <a href="{{ asset('downloads/WishSwipe-1.0.0.AppImage') }}" 
+                   download 
+                   class="btn btn-large"
+                   style="background: white; color: #667eea; padding: 15px 40px; font-size: 1.1rem; font-weight: 600; border-radius: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                    <i class="fas fa-download"></i>
+                    Download AppImage (78 MB)
+                </a>
+                
+                <a href="{{ asset('downloads/wishswipe-desktop_1.0.0_amd64.snap') }}" 
+                   download
+                   class="btn btn-large"
+                   style="background: rgba(255,255,255,0.2); color: white; padding: 15px 40px; font-size: 1.1rem; font-weight: 600; border-radius: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; border: 2px solid white;">
+                    <i class="fas fa-download"></i>
+                    Download Snap (85 MB)
+                </a>
+            </div>
+            
+            <div style="margin-top: 40px; font-size: 0.9rem; opacity: 0.9;">
+                <p><strong>Installation:</strong></p>
+                <p><strong>AppImage:</strong> <code style="background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 4px;">chmod +x WishSwipe-1.0.0.AppImage && ./WishSwipe-1.0.0.AppImage</code></p>
+                <p><strong>Snap:</strong> <code style="background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 4px;">sudo snap install wishswipe-desktop_1.0.0_amd64.snap --dangerous --classic</code></p>
+            </div>
+        </div>
+    </section>
+
     <section class="cta-section">
         <div class="container">
             <div class="cta-content">
@@ -666,6 +729,76 @@
     </footer>
 
     <script src="{{ asset('js/landing.js') }}" defer></script>
+    
+    <!-- PWA Install Prompt & Service Worker -->
+    <script>
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+        
+        // PWA Install Prompt
+        let deferredPrompt;
+        const installButton = document.createElement('button');
+        installButton.textContent = '📱 Install App';
+        installButton.className = 'btn btn-primary pwa-install-btn';
+        installButton.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: none;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+            animation: pulse 2s infinite;
+        `;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installButton.style.display = 'block';
+            document.body.appendChild(installButton);
+        });
+        
+        installButton.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to install prompt: ${outcome}`);
+                deferredPrompt = null;
+                installButton.style.display = 'none';
+            }
+        });
+        
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA installed successfully!');
+            installButton.style.display = 'none';
+        });
+        
+        // Add pulse animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 
     <script>
         // Mobile menu toggle

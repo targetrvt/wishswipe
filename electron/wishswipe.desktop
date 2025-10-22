@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=WishSwipe
+Comment=Swipe Your Way to Great Deals
+Exec=/home/df/WishSwipe-1.0.0-FIXED.AppImage --no-sandbox
+Icon=/home/df/wishswipe/public/images/wishSwipe_logo.png
+Terminal=false
+Type=Application
+Categories=Network;Shopping;
+StartupWMClass=WishSwipe
+StartupNotify=true
+
+

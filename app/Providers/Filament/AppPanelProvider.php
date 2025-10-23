@@ -94,6 +94,7 @@ class AppPanelProvider extends PanelProvider
                         hasAvatars: true
                     )
                     ->enableTwoFactorAuthentication()
+                    ->enableBrowserSessions(condition: true)
             ]);
     }
 }

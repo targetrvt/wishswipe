@@ -11,6 +11,15 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Actions as FormActions;
+use Filament\Forms\Components\Actions\Action as FormAction;
+use Filament\Forms\Components\Hidden;
+use Cheesegrits\FilamentGoogleMaps\Fields\Map;
 
 class SwipingPage extends Page
 {
@@ -32,6 +41,13 @@ class SwipingPage extends Page
     public array $productsStack = [];
     public bool $noMoreProducts = false;
     public ?int $selectedCategory = null;
+    public ?float $minPrice = null;
+    public ?float $maxPrice = null;
+    public ?array $locationCoordinates = null; // For map field
+    public ?string $locationText = null; // Display field for location name
+    public ?float $locationLatitude = null;
+    public ?float $locationLongitude = null;
+    public ?int $radiusKm = 50; // Default radius in kilometers
 
     private const STACK_SIZE = 15;
     private const MIN_STACK_SIZE = 5;
@@ -40,6 +56,175 @@ class SwipingPage extends Page
     public function mount(): void
     {
         $this->loadProducts();
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('filters')
+                ->label(__('discover.filters.filter_button'))
+                ->icon('heroicon-o-funnel')
+                ->badge($this->hasActiveFilters() ? __('discover.filters.active') : null)
+                ->badgeColor('success')
+                ->form([                  
+                    Grid::make(2)
+                        ->schema([
+                            TextInput::make('minPrice')
+                                ->label(__('discover.filters.min_price'))
+                                ->numeric()
+                                ->minValue(0)
+                                ->step(0.01)
+                                ->prefix('€')
+                                ->placeholder('0.00'),
+                            
+                            TextInput::make('maxPrice')
+                                ->label(__('discover.filters.max_price'))
+                                ->numeric()
+                                ->minValue(0)
+                                ->step(0.01)
+                                ->prefix('€')
+                                ->placeholder('0.00'),
+                        ]),
+                    
+                    Section::make(__('discover.filters.location_filter'))
+                        ->description(__('discover.filters.location_description'))
+                        ->icon('heroicon-o-map-pin')
+                        ->collapsible()
+                        ->collapsed()
+                        ->schema([
+                            TextInput::make('locationText')
+                                ->label(__('discover.filters.search_location'))
+                                ->placeholder(__('discover.filters.location_placeholder'))
+                                ->helperText(__('discover.filters.location_helper'))
+                                ->reactive()
+                                ->debounce(1000),
+                            
+                            Map::make('locationCoordinates')
+                                ->label(__('discover.filters.map_label'))
+                                ->mapControls([
+                                    'mapTypeControl' => true,
+                                    'scaleControl' => true,
+                                    'streetViewControl' => false,
+                                    'rotateControl' => false,
+                                    'fullscreenControl' => true,
+                                    'searchBoxControl' => false,
+                                    'zoomControl' => true,
+                                ])
+                                ->height(fn () => '350px')
+                                ->defaultZoom(5)
+                                ->autocomplete('locationText')
+                                ->autocompleteReverse(true)
+                                ->reverseGeocode([
+                                    'locationText' => '%A1, %c',
+                                ])
+                                ->defaultLocation([56.9496, 24.1052]) // Riga, Latvia
+                                ->draggable()
+                                ->clickable()
+                                ->geolocate()
+                                ->geolocateLabel(__('discover.filters.geolocate_label'))
+                                ->geolocateOnLoad(false, false)
+                                ->reactive()
+                                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                    if (is_array($state) && isset($state['lat']) && isset($state['lng'])) {
+                                        $lat = round((float) $state['lat'], 7);
+                                        $lng = round((float) $state['lng'], 7);
+                                        $set('locationLatitude', $lat);
+                                        $set('locationLongitude', $lng);
+                                        
+                                        // Get the location text and clean it
+                                        $locationText = $get('locationText');
+                                        if ($locationText) {
+                                            // Remove Plus Code pattern (e.g., "X494+36 ")
+                                            $cleanText = preg_replace('/^[A-Z0-9]{4}\+[A-Z0-9]{2}\s+/', '', $locationText);
+                                            // Split by comma
+                                            $parts = array_map('trim', explode(',', $cleanText));
+                                            // Filter out postal codes (like LV-1010) and empty parts
+                                            $parts = array_filter($parts, function($part) {
+                                                return !empty($part) && !preg_match('/^[A-Z]{2}-?\d+$/', $part);
+                                            });
+                                            // Remove duplicates
+                                            $parts = array_unique($parts);
+                                            // Get last 2 parts (region/city and country)
+                                            if (count($parts) >= 2) {
+                                                $country = array_pop($parts);
+                                                $region = array_pop($parts);
+                                                $cleanText = "$region, $country";
+                                            } elseif (count($parts) === 1) {
+                                                $cleanText = $parts[0];
+                                            }
+                                            $set('locationText', $cleanText);
+                                        }
+                                    }
+                                })
+                                ->helperText(__('discover.filters.map_helper')),
+                            
+                            Hidden::make('locationLatitude'),
+                            Hidden::make('locationLongitude'),
+                            
+                            TextInput::make('radiusKm')
+                                ->label(__('discover.filters.radius') . ' (km)')
+                                ->numeric()
+                                ->minValue(5)
+                                ->maxValue(200)
+                                ->step(5)
+                                ->default(50)
+                                ->suffix('km')
+                                ->helperText(__('discover.filters.radius_helper'))
+                                ->visible(fn (callable $get) => $get('locationLatitude') !== null && $get('locationLongitude') !== null),
+                        ]),
+                ])
+                ->modalWidth('lg')
+                ->action(function (array $data): void {
+                    try {
+                        $this->minPrice = !empty($data['minPrice']) ? (float) $data['minPrice'] : null;
+                        $this->maxPrice = !empty($data['maxPrice']) ? (float) $data['maxPrice'] : null;
+                        $this->locationCoordinates = $data['locationCoordinates'] ?? null;
+                        $this->locationText = $data['locationText'] ?? null;
+                        $this->locationLatitude = !empty($data['locationLatitude']) ? (float) $data['locationLatitude'] : null;
+                        $this->locationLongitude = !empty($data['locationLongitude']) ? (float) $data['locationLongitude'] : null;
+                        $this->radiusKm = !empty($data['radiusKm']) ? (int) $data['radiusKm'] : 50;
+                        
+                        $this->resetState();
+                        $this->loadProducts();
+                        
+                        Notification::make()
+                            ->success()
+                            ->title(__('discover.filters.applied'))
+                            ->send();
+                    } catch (\Exception $e) {
+                        \Log::error('Filter error: ' . $e->getMessage(), [
+                            'data' => $data,
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                        
+                        Notification::make()
+                            ->danger()
+                            ->title('Error applying filters')
+                            ->body($e->getMessage())
+                            ->send();
+                    }
+                })
+                ->fillForm([
+                    'minPrice' => $this->minPrice,
+                    'maxPrice' => $this->maxPrice,
+                    'locationCoordinates' => $this->locationCoordinates,
+                    'locationText' => $this->locationText,
+                    'locationLatitude' => $this->locationLatitude,
+                    'locationLongitude' => $this->locationLongitude,
+                    'radiusKm' => $this->radiusKm,
+                ])
+                ->modalSubmitActionLabel(__('discover.filters.apply'))
+                ->modalCancelActionLabel(__('discover.filters.cancel'))
+                ->extraModalFooterActions([
+                    Action::make('reset')
+                        ->label(__('discover.filters.reset'))
+                        ->icon('heroicon-o-x-mark')
+                        ->color('gray')
+                        ->action(function () {
+                            $this->resetFilters();
+                        }),
+                ]),
+        ];
     }
 
     public function loadProducts(): void
@@ -109,8 +294,30 @@ class SwipingPage extends Page
     public function resetFilters(): void
     {
         $this->selectedCategory = null;
+        $this->minPrice = null;
+        $this->maxPrice = null;
+        $this->locationCoordinates = null;
+        $this->locationText = null;
+        $this->locationLatitude = null;
+        $this->locationLongitude = null;
+        $this->radiusKm = 50;
         $this->resetState();
         $this->loadProducts();
+        
+        Notification::make()
+            ->success()
+            ->title(__('discover.filters.reset'))
+            ->body(__('discover.filters.reset_success'))
+            ->send();
+    }
+
+    public function hasActiveFilters(): bool
+    {
+        return $this->selectedCategory !== null 
+            || $this->minPrice !== null 
+            || $this->maxPrice !== null 
+            || $this->locationLatitude !== null
+            || $this->locationLongitude !== null;
     }
 
     public function getCategoriesProperty()
@@ -132,16 +339,31 @@ class SwipingPage extends Page
     {
         $userId = auth()->id();
 
-        return Product::query()
+        $query = Product::query()
             ->active()
             ->where('user_id', '!=', $userId)
             ->whereNotIn('id', $this->getSwipedProductIds($userId))
             ->when($this->selectedCategory, fn($q) => $q->where('category_id', $this->selectedCategory))
+            ->when($this->minPrice !== null, fn($q) => $q->where('price', '>=', $this->minPrice))
+            ->when($this->maxPrice !== null, fn($q) => $q->where('price', '<=', $this->maxPrice));
+
+        // Apply location radius filtering (coordinates-based)
+        if ($this->locationLatitude !== null && $this->locationLongitude !== null && $this->radiusKm) {
+            $query->withinRadius($this->locationLatitude, $this->locationLongitude, $this->radiusKm);
+            
+            return $query
+                ->with(['category:id,name,icon', 'user:id,name'])
+                ->limit($limit)
+                ->get();
+        }
+
+        return $query
             ->with(['category:id,name,icon', 'user:id,name'])
             ->select([
                 'id', 'title', 'description', 'price',
                 'condition', 'location', 'images',
-                'category_id', 'user_id', 'created_at'
+                'category_id', 'user_id', 'created_at',
+                'latitude', 'longitude'
             ])
             ->inRandomOrder()
             ->limit($limit)
@@ -260,21 +482,36 @@ class SwipingPage extends Page
         try {
             $excludeIds = $this->getExcludedProductIds();
 
-            $products = Product::query()
+            $query = Product::query()
                 ->active()
                 ->where('user_id', '!=', auth()->id())
                 ->whereNotIn('id', $excludeIds)
                 ->whereNotIn('id', $this->getSwipedProductIds(auth()->id()))
                 ->when($this->selectedCategory, fn($q) => $q->where('category_id', $this->selectedCategory))
-                ->with(['category:id,name,icon', 'user:id,name'])
-                ->select([
-                    'id', 'title', 'description', 'price',
-                    'condition', 'location', 'images',
-                    'category_id', 'user_id', 'created_at'
-                ])
-                ->inRandomOrder()
-                ->limit(self::STACK_SIZE)
-                ->get();
+                ->when($this->minPrice !== null, fn($q) => $q->where('price', '>=', $this->minPrice))
+                ->when($this->maxPrice !== null, fn($q) => $q->where('price', '<=', $this->maxPrice));
+
+            // Apply location radius filtering (coordinates-based)
+            if ($this->locationLatitude !== null && $this->locationLongitude !== null && $this->radiusKm) {
+                $query->withinRadius($this->locationLatitude, $this->locationLongitude, $this->radiusKm);
+                
+                $products = $query
+                    ->with(['category:id,name,icon', 'user:id,name'])
+                    ->limit(self::STACK_SIZE)
+                    ->get();
+            } else {
+                $products = $query
+                    ->with(['category:id,name,icon', 'user:id,name'])
+                    ->select([
+                        'id', 'title', 'description', 'price',
+                        'condition', 'location', 'images',
+                        'category_id', 'user_id', 'created_at',
+                        'latitude', 'longitude'
+                    ])
+                    ->inRandomOrder()
+                    ->limit(self::STACK_SIZE)
+                    ->get();
+            }
 
             $newProducts = $products->map(fn($product) => $this->formatProduct($product))->toArray();
 

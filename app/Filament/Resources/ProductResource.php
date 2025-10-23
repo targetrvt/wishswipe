@@ -13,7 +13,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Notification;
 use Cheesegrits\FilamentGoogleMaps\Fields\Map;
-use Cheesegrits\FilamentGoogleMaps\Fields\Geocomplete;
 
 class ProductResource extends Resource
 {
@@ -34,6 +33,10 @@ class ProductResource extends Resource
     public static function getNavigationGroup(): ?string
     {
         return __('navigation.groups.marketplace');
+    }
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->hasRole('super_admin');
     }
     
     protected static ?int $navigationSort = 1;
@@ -97,22 +100,13 @@ class ProductResource extends Resource
                 Forms\Components\Section::make(__('listings.form.location'))
                     ->description(__('listings.filament.location_helper'))
                     ->schema([
-                        Geocomplete::make('location_address')
-                            ->label('Location Description')
-                            ->isLocation()
-                            ->default([])
-                            ->reverseGeocode([
-                                'city' => '%L',
-                                'zip' => '%z',
-                                'state' => '%A1',
-                                'country' => '%c',
-                            ])
-                            ->countries(['us', 'gb', 'lv'])
-                            ->placeholder('e.g., Riga, Latvia'),
                         Forms\Components\TextInput::make('location')
                             ->label(__('listings.form.location'))
                             ->maxLength(255)
                             ->placeholder(__('listings.filament.location_placeholder'))
+                            ->helperText('Type a location to search, or click on the map below to auto-fill')
+                            ->reactive()
+                            ->debounce(1000)
                             ->columnSpanFull(),
                         
                         Map::make('coordinates')
@@ -131,7 +125,7 @@ class ProductResource extends Resource
                             ->autocomplete('location')
                             ->autocompleteReverse(true)
                             ->reverseGeocode([
-                                'location' => '%n %S, %L, %A1 %z',
+                                'location' => '%A1, %c',
                             ])
                             ->defaultLocation([56.9496, 24.1052])
                             ->draggable()
@@ -147,6 +141,30 @@ class ProductResource extends Resource
                                     $lng = round((float) $state['lng'], 4);
                                     $set('latitude', $lat);
                                     $set('longitude', $lng);
+                                    
+                                    // Get the location text and clean it
+                                    $location = $get('location');
+                                    if ($location) {
+                                        // Remove Plus Code pattern (e.g., "X494+36 ")
+                                        $cleanText = preg_replace('/^[A-Z0-9]{4}\+[A-Z0-9]{2}\s+/', '', $location);
+                                        // Split by comma
+                                        $parts = array_map('trim', explode(',', $cleanText));
+                                        // Filter out postal codes (like LV-1010) and empty parts
+                                        $parts = array_filter($parts, function($part) {
+                                            return !empty($part) && !preg_match('/^[A-Z]{2}-?\d+$/', $part);
+                                        });
+                                        // Remove duplicates
+                                        $parts = array_unique($parts);
+                                        // Get last 2 parts (region/city and country)
+                                        if (count($parts) >= 2) {
+                                            $country = array_pop($parts);
+                                            $region = array_pop($parts);
+                                            $cleanText = "$region, $country";
+                                        } elseif (count($parts) === 1) {
+                                            $cleanText = $parts[0];
+                                        }
+                                        $set('location', $cleanText);
+                                    }
                                 }
                             })
                             ->helperText(__('listings.filament.map_helper')),
@@ -155,6 +173,7 @@ class ProductResource extends Resource
                             ->schema([
                                 Forms\Components\TextInput::make('latitude')
                                     ->label(__('listings.filament.latitude_label'))
+                                    ->hidden(true)
                                     ->numeric()
                                     ->step(0.0001)
                                     ->minValue(-90)
@@ -179,6 +198,7 @@ class ProductResource extends Resource
                                 
                                 Forms\Components\TextInput::make('longitude')
                                     ->label(__('listings.filament.longitude_label'))
+                                    ->hidden(true)
                                     ->numeric()
                                     ->step(0.0001)
                                     ->minValue(-180)

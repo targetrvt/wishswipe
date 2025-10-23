@@ -516,6 +516,7 @@
             .filter-filament-container {
                 padding: 0 0.5rem;
                 margin: -1rem auto 0.5rem;
+                max-width: 100%;
             }
 
             .swipe-container {
@@ -557,11 +558,6 @@
 
             .action-buttons {
                 margin-top: 1rem;
-            }
-
-            .filter-filament-wrapper {
-                flex-direction: column;
-                gap: 0.5rem;
             }
 
             .filter-filament-wrapper > div:first-child {
@@ -616,9 +612,10 @@
     </style>
 
 
+    {{-- Quick Category Filter - Main filter button is in page header --}}
     <div class="filter-filament-container">
         <div class="filter-filament-wrapper">
-            <x-filament::input.wrapper>
+            <x-filament::input.wrapper style="flex: 1;">
                 <x-filament::input.select wire:model.live="selectedCategory">
                     <option value="">{{ __('discover.filters.all_categories') }}</option>
                     @foreach(\App\Models\Category::where('is_active', true)->orderBy('name')->get() as $category)
@@ -626,17 +623,6 @@
                     @endforeach
                 </x-filament::input.select>
             </x-filament::input.wrapper>
-            
-            @if($selectedCategory)
-                <x-filament::button
-                    wire:click="resetFilters"
-                    color="gray"
-                    size="md"
-                    icon="heroicon-o-x-mark"
-                    tooltip="{{ __('discover.filters.clear_tooltip') }}">
-                    {{ __('discover.filters.clear') }}
-                </x-filament::button>
-            @endif
         </div>
     </div>
 

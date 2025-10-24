@@ -194,4 +194,41 @@ class ConversationResource extends Resource
     {
         return auth()->user()->hasRole('super_admin');
     }
+    
+    public static function getGlobalSearchResultTitle($record): string
+    {
+        return 'Conversation: ' . $record->product->title;
+    }
+    
+    public static function getGlobalSearchResultDetails($record): array
+    {
+        return [
+            'Buyer' => $record->matched->buyer->name ?? 'Unknown',
+            'Seller' => $record->matched->seller->name ?? 'Unknown',
+            'Product' => $record->product->title,
+            'Messages' => $record->messages_count ?? 0,
+            'Last Activity' => $record->last_message_at ? $record->last_message_at->diffForHumans() : 'No messages',
+        ];
+    }
+    
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['product.title'];
+    }
+    
+    public static function getGlobalSearchResultUrl($record): string
+    {
+        return route('filament.app.resources.conversations.view', $record);
+    }
+    
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        $userId = auth()->id();
+        
+        return parent::getEloquentQuery()
+            ->whereHas('matched', function ($query) use ($userId) {
+                $query->where('buyer_id', $userId)
+                    ->orWhere('seller_id', $userId);
+            });
+    }
 }

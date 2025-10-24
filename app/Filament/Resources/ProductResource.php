@@ -42,6 +42,36 @@ class ProductResource extends Resource
     protected static ?int $navigationSort = 1;
     
     protected static ?string $recordTitleAttribute = 'title';
+    
+    public static function getGlobalSearchResultTitle($record): string
+    {
+        return $record->title;
+    }
+    
+    public static function getGlobalSearchResultDetails($record): array
+    {
+        return [
+            __('listings.form.category') => $record->category->name ?? __('listings.modal.uncategorized'),
+            __('listings.form.price') => '€' . number_format($record->price, 2),
+            __('listings.form.condition') => __('listings.condition.' . $record->condition),
+            __('listings.form.status') => __('listings.status.' . $record->status),
+        ];
+    }
+    
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['title', 'description', 'price'];
+    }
+    
+    public static function getGlobalSearchResultUrl($record): string
+    {
+        return route('filament.app.resources.products.edit', $record);
+    }
+    
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return static::getEloquentQuery()->where('user_id', auth()->id());
+    }
 
     public static function form(Form $form): Form
     {

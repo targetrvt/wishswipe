@@ -25,6 +25,42 @@ class MessageResource extends Resource
     protected static ?int $navigationSort = 6;
     
     protected static bool $shouldRegisterNavigation = false; // Hide from navigation
+    
+    public static function getGlobalSearchResultTitle($record): string
+    {
+        return 'Message: ' . \Str::limit($record->content, 50);
+    }
+    
+    public static function getGlobalSearchResultDetails($record): array
+    {
+        return [
+            'From' => $record->user->name,
+            'Product' => $record->conversation->product->title ?? 'Unknown Product',
+            'Sent' => $record->created_at->diffForHumans(),
+            'Status' => $record->is_read ? 'Read' : 'Unread',
+        ];
+    }
+    
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['content'];
+    }
+    
+    public static function getGlobalSearchResultUrl($record): string
+    {
+        return route('filament.app.resources.conversations.view', $record->conversation_id);
+    }
+    
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        $userId = auth()->id();
+        
+        return parent::getEloquentQuery()
+            ->whereHas('conversation.matched', function ($query) use ($userId) {
+                $query->where('buyer_id', $userId)
+                    ->orWhere('seller_id', $userId);
+            });
+    }
 
     public static function form(Form $form): Form
     {

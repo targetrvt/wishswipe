@@ -15,6 +15,7 @@ return [
         'total_swipes' => 'Total Swipes',
         'likes' => 'Likes',
         'active' => 'Active',
+        'negotiable' => 'Negotiable',
         'created_at' => 'Created At',
     ],
     
@@ -57,6 +58,7 @@ return [
         'map' => 'Map',
         'images' => 'Images',
         'active' => 'Active',
+        'negotiable' => 'Negotiable',
     ],
     
     'bulk_actions' => [
@@ -151,6 +153,7 @@ return [
         'visibility_section' => 'Visibility Settings',
         'visibility_description' => 'Control how your product appears to other users',
         'active_helper' => 'Inactive products will not be shown to other users',
+        'negotiable_helper' => 'Allow other users to negotiate the price',
         'geolocate_label' => '📍 Get My Location',
         'map_helper' => 'Click on the map to set your location, or use the search box and "Get My Location" button',
         'latitude_label' => 'Latitude',

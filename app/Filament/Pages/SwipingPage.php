@@ -7,7 +7,9 @@ use App\Models\Product;
 use App\Models\Swipe;
 use App\Models\Matched;
 use App\Models\Category;
+use App\Models\Message;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -48,6 +50,11 @@ class SwipingPage extends Page
     public ?float $locationLatitude = null;
     public ?float $locationLongitude = null;
     public ?int $radiusKm = 50; // Default radius in kilometers
+    
+    // Negotiate form properties
+    public bool $showNegotiateForm = false;
+    public ?float $negotiatePrice = null;
+    public ?string $negotiateMessage = null;
 
     private const STACK_SIZE = 15;
     private const MIN_STACK_SIZE = 5;
@@ -285,6 +292,93 @@ class SwipingPage extends Page
         }
     }
 
+    public function negotiate(): void
+    {
+        if (!$this->currentProduct) {
+            return;
+        }
+
+        // Show negotiate form instead of directly creating message
+        $this->showNegotiateForm = true;
+        $this->negotiatePrice = null; // No default value, user must enter it
+        $this->negotiateMessage = null;
+    }
+
+    public function submitNegotiate(): void
+    {
+        if (!$this->currentProduct || !$this->negotiatePrice) {
+            Notification::make()
+                ->title(__('discover.negotiate.error_title'))
+                ->body(__('discover.negotiate.error_price_required'))
+                ->danger()
+                ->send();
+            return;
+        }
+
+        if ($this->negotiatePrice >= $this->currentProduct['price']) {
+            Notification::make()
+                ->title(__('discover.negotiate.error_title'))
+                ->body(__('discover.negotiate.error_price_too_high'))
+                ->danger()
+                ->send();
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $this->recordSwipe('right'); // Also record as a right swipe
+
+            $product = Product::find($this->currentProduct['id']);
+
+            if ($product && $this->createMatchIfMutual($product)) {
+                $this->notifyMatch();
+                
+                // Create a negotiate request message in the conversation
+                $this->createNegotiateRequestMessage($product, $this->negotiatePrice, $this->negotiateMessage);
+            }
+
+            DB::commit();
+            $this->moveToNextProduct();
+            $this->showNegotiateForm = false;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->handleError(__('discover.errors.swipe_failed'), $e);
+            $this->moveToNextProduct();
+        }
+    }
+
+    public function cancelNegotiate(): void
+    {
+        $this->showNegotiateForm = false;
+        $this->negotiatePrice = null;
+        $this->negotiateMessage = null;
+    }
+
+    private function createNegotiateRequestMessage($product, $proposedPrice, $message = null): void
+    {
+        $match = Matched::where('buyer_id', Auth::id())
+            ->where('seller_id', $product->user_id)
+            ->where('product_id', $product->id)
+            ->first();
+
+        if ($match && $match->conversation) {
+            Message::create([
+                'conversation_id' => $match->conversation->id,
+                'user_id' => Auth::id(),
+                'content' => json_encode([
+                    'type' => 'negotiate_request',
+                    'product_id' => $product->id,
+                    'product_title' => $product->title,
+                    'original_price' => $product->price,
+                    'proposed_price' => $proposedPrice,
+                    'message' => $message ?: 'I would like to negotiate the price for this item.'
+                ]),
+                'is_read' => false,
+            ]);
+        }
+    }
+
     public function updatedSelectedCategory(): void
     {
         $this->resetState();
@@ -353,6 +447,12 @@ class SwipingPage extends Page
             
             return $query
                 ->with(['category:id,name,icon', 'user:id,name'])
+                ->select([
+                    'id', 'title', 'description', 'price',
+                    'condition', 'location', 'images',
+                    'category_id', 'user_id', 'created_at',
+                    'latitude', 'longitude', 'is_negotiable'
+                ])
                 ->limit($limit)
                 ->get();
         }
@@ -363,7 +463,7 @@ class SwipingPage extends Page
                 'id', 'title', 'description', 'price',
                 'condition', 'location', 'images',
                 'category_id', 'user_id', 'created_at',
-                'latitude', 'longitude'
+                'latitude', 'longitude', 'is_negotiable'
             ])
             ->inRandomOrder()
             ->limit($limit)
@@ -399,6 +499,7 @@ class SwipingPage extends Page
             'condition' => $product->condition,
             'location' => $product->location,
             'images' => $this->normalizeImages($product->images),
+            'is_negotiable' => $product->is_negotiable ?? false,
             'category' => [
                 'id' => $product->category?->id,
                 'name' => $product->category?->name ?? __('discover.uncategorized'),

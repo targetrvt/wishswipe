@@ -7,9 +7,6 @@ use Illuminate\Support\Facades\DB;
 
 class WishswipeFresh extends Command
 {
-    /**
-     * The name and signature of the console command.
-     */
     protected $signature = 'wishswipe:fresh';
 
     /**

@@ -55,7 +55,11 @@ return [
     'actions' => [
         'pass' => 'Pass',
         'add_to_cart' => 'Add to Cart',
+        'negotiate' => 'Negotiate',
     ],
+
+    'negotiable' => 'Negotiable',
+    'fixed_price' => 'Fixed Price',
     
     'keyboard' => [
         'pass' => 'to pass',
@@ -89,5 +93,30 @@ return [
         'title' => 'Start Discovering Products',
         'description' => 'Swipe through available items in your area',
         'start_swiping' => 'Start Swiping',
+    ],
+
+    'negotiate' => [
+        'navigation_label' => 'Negotiate',
+        'page_title' => 'Negotiate Prices',
+        'seller' => 'Seller',
+        'form_title' => 'Submit Offer',
+        'proposed_price' => 'Proposed Price',
+        'price_help' => 'Maximum price: €:max',
+        'message_label' => 'Message (optional)',
+        'message_placeholder' => 'Enter your message here...',
+        'submit_button' => 'Submit Offer',
+        'cancel_button' => 'Cancel',
+        'skip_button' => 'Skip',
+        'negotiate_button' => 'Negotiate',
+        'products_remaining' => ':count products remaining',
+        'no_products_title' => 'No Products to Negotiate',
+        'no_products_message' => 'No products available for negotiation. Check back later or refresh the list.',
+        'refresh_button' => 'Refresh List',
+        'success_title' => 'Offer Submitted!',
+        'success_message' => 'Your offer has been sent to the seller',
+        'error_title' => 'Error',
+        'error_price_required' => 'Please enter a price',
+        'error_price_too_high' => 'Price cannot be higher than the original price',
+        'error_general' => 'Something went wrong. Please try again',
     ],
 ];

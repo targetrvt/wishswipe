@@ -55,7 +55,11 @@ return [
     'actions' => [
         'pass' => 'Izlaist',
         'add_to_cart' => 'Pievienot Grozam',
+        'negotiate' => 'Sarunāt',
     ],
+
+    'negotiable' => 'Sarunājams',
+    'fixed_price' => 'Fiksēta Cena',
     
     'keyboard' => [
         'pass' => 'lai izlaistu',
@@ -89,5 +93,30 @@ return [
         'title' => 'Sāciet Atklāt Produktus',
         'description' => 'Velciet cauri pieejamajiem priekšmetiem jūsu apkārtnē',
         'start_swiping' => 'Sākt Vilkt',
+    ],
+
+    'negotiate' => [
+        'navigation_label' => 'Sarunāt',
+        'page_title' => 'Sarunāt Cenas',
+        'seller' => 'Pārdevējs',
+        'form_title' => 'Iesniegt Piedāvājumu',
+        'proposed_price' => 'Ierosinātā Cena',
+        'price_help' => 'Maksimālā cena: €:max',
+        'message_label' => 'Ziņojums (nav obligāts)',
+        'message_placeholder' => 'Ierakstiet savu ziņojumu šeit...',
+        'submit_button' => 'Iesniegt Piedāvājumu',
+        'cancel_button' => 'Atcelt',
+        'skip_button' => 'Izlaist',
+        'negotiate_button' => 'Sarunāt',
+        'products_remaining' => 'Atlikuši :count produkti',
+        'no_products_title' => 'Nav Produktu Sarunāšanai',
+        'no_products_message' => 'Nav pieejamu produktu sarunāšanai. Pārbaudiet vēlāk vai atjaunojiet sarakstu.',
+        'refresh_button' => 'Atjaunot Sarakstu',
+        'success_title' => 'Piedāvājums Iesniegts!',
+        'success_message' => 'Jūsu piedāvājums ir nosūtīts pārdevējam',
+        'error_title' => 'Kļūda',
+        'error_price_required' => 'Lūdzu, ievadiet cenu',
+        'error_price_too_high' => 'Cena nevar būt augstāka par sākotnējo cenu',
+        'error_general' => 'Kaut kas nogāja greizi. Lūdzu, mēģiniet vēlreiz',
     ],
 ];

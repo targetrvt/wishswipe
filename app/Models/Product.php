@@ -25,6 +25,7 @@ class Product extends Model
         'latitude',
         'longitude',
         'is_active',
+        'is_negotiable',
         'view_count',
     ];
 
@@ -34,6 +35,7 @@ class Product extends Model
         'latitude' => 'decimal:4',
         'longitude' => 'decimal:4',
         'is_active' => 'boolean',
+        'is_negotiable' => 'boolean',
         'location_address' => 'array',
     ];
 
@@ -104,6 +106,11 @@ class Product extends Model
     public function conversations(): HasMany
     {
         return $this->hasMany(Conversation::class);
+    }
+
+    public function negotiateRequests(): HasMany
+    {
+        return $this->hasMany(NegotiateRequest::class);
     }
 
     public function getFirstImageAttribute()

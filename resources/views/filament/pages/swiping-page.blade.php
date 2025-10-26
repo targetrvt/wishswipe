@@ -379,6 +379,11 @@
             color: white;
         }
 
+        .action-btn.negotiate {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
         .action-btn svg {
             width: 32px;
             height: 32px;
@@ -719,6 +724,14 @@
                             ">
                                 {{ __(sprintf('discover.conditions.%s', $currentProduct['condition'])) }}
                             </span>
+                            @if($currentProduct['is_negotiable'] ?? false)
+                                <span class="card-badge" style="background: rgba(139, 92, 246, 0.95); color: white; backdrop-filter: blur(10px); display: flex; align-items: center; gap: 0.25rem;">
+                                    <svg style="width: 14px; height: 14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                    </svg>
+                                    Negotiable
+                                </span>
+                            @endif
                         </div>
                     </div>
 
@@ -771,6 +784,18 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
+
+                @if($currentProduct['is_negotiable'] ?? false)
+                    <button 
+                        wire:click="negotiate"
+                        class="action-btn negotiate"
+                        wire:loading.attr="disabled"
+                        title="Negotiate Price">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 32px; height: 32px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                        </svg>
+                    </button>
+                @endif
 
                 <button 
                     @click="swipeCard('right')" 
@@ -1144,4 +1169,276 @@
         });
     </script>
     @endscript
+
+    {{-- Negotiation Form Modal --}}
+    @if($showNegotiateForm)
+        <div class="negotiate-modal-overlay" wire:click="cancelNegotiate">
+            <div class="negotiate-modal" wire:click.stop>
+                <div class="negotiate-modal-header">
+                    <h3>Negotiate Price</h3>
+                    <button wire:click="cancelNegotiate" class="negotiate-modal-close">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="negotiate-modal-body">
+                    <div class="negotiate-product-info">
+                        <h4>{{ $currentProduct['title'] ?? '' }}</h4>
+                        <p class="negotiate-original-price">Original Price: €{{ number_format($currentProduct['price'] ?? 0, 2) }}</p>
+                    </div>
+                    
+                    <form wire:submit.prevent="submitNegotiate">
+                        <div class="negotiate-form-group">
+                            <label for="negotiatePrice">Your Proposed Price (€)</label>
+                            <input 
+                                type="number" 
+                                id="negotiatePrice"
+                                wire:model="negotiatePrice"
+                                step="0.01"
+                                min="0.01"
+                                max="{{ $currentProduct['price'] ?? 0 }}"
+                                required
+                                class="negotiate-input"
+                                placeholder="Enter your price">
+                            <small class="negotiate-hint">Must be less than the original price</small>
+                        </div>
+                        
+                        <div class="negotiate-form-group">
+                            <label for="negotiateMessage">Message (Optional)</label>
+                            <textarea 
+                                id="negotiateMessage"
+                                wire:model="negotiateMessage"
+                                rows="3"
+                                class="negotiate-textarea"
+                                placeholder="Add a message to your negotiation request"></textarea>
+                        </div>
+                        
+                        <div class="negotiate-modal-actions">
+                            <button type="button" wire:click="cancelNegotiate" class="negotiate-btn-cancel">
+                                Cancel
+                            </button>
+                            <button type="submit" class="negotiate-btn-submit" wire:loading.attr="disabled">
+                                <span wire:loading.remove wire:target="submitNegotiate">Send Request</span>
+                                <span wire:loading wire:target="submitNegotiate">Sending...</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <style>
+        .negotiate-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+        }
+
+        .negotiate-modal {
+            background: white;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .negotiate-modal {
+            background: #1f2937;
+        }
+
+        .negotiate-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .dark .negotiate-modal-header {
+            border-bottom-color: #374151;
+        }
+
+        .negotiate-modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+
+        .dark .negotiate-modal-header h3 {
+            color: #f9fafb;
+        }
+
+        .negotiate-modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            color: #6b7280;
+            transition: color 0.15s ease;
+        }
+
+        .negotiate-modal-close:hover {
+            color: #111827;
+        }
+
+        .dark .negotiate-modal-close:hover {
+            color: #f9fafb;
+        }
+
+        .negotiate-modal-close svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .negotiate-modal-body {
+            padding: 1.5rem;
+        }
+
+        .negotiate-product-info {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .dark .negotiate-product-info {
+            border-bottom-color: #374151;
+        }
+
+        .negotiate-product-info h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .dark .negotiate-product-info h4 {
+            color: #f9fafb;
+        }
+
+        .negotiate-original-price {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .dark .negotiate-original-price {
+            color: #9ca3af;
+        }
+
+        .negotiate-form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .negotiate-form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .dark .negotiate-form-group label {
+            color: #d1d5db;
+        }
+
+        .negotiate-input,
+        .negotiate-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: border-color 0.15s ease;
+        }
+
+        .dark .negotiate-input,
+        .dark .negotiate-textarea {
+            background: #374151;
+            border-color: #4b5563;
+            color: #f9fafb;
+        }
+
+        .negotiate-input:focus,
+        .negotiate-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .negotiate-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .negotiate-hint {
+            display: block;
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        .dark .negotiate-hint {
+            color: #9ca3af;
+        }
+
+        .negotiate-modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .negotiate-btn-cancel,
+        .negotiate-btn-submit {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .negotiate-btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .negotiate-btn-cancel:hover {
+            background: #e5e7eb;
+        }
+
+        .dark .negotiate-btn-cancel {
+            background: #374151;
+            color: #d1d5db;
+        }
+
+        .dark .negotiate-btn-cancel:hover {
+            background: #4b5563;
+        }
+
+        .negotiate-btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .negotiate-btn-submit:hover {
+            opacity: 0.9;
+        }
+
+        .negotiate-btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
 </x-filament-panels::page>

@@ -4,6 +4,8 @@ namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
 use App\Models\Conversation;
+use App\Models\Message;
+use App\Models\NegotiateRequest;
 use Livewire\Attributes\Computed;
 
 class ConversationsPage extends Page
@@ -37,6 +39,7 @@ class ConversationsPage extends Page
                 ->orWhere('seller_id', $userId);
         })
         ->with(['matched.buyer', 'matched.seller', 'product', 'latestMessage'])
+        ->orderByDesc('created_at')
         ->orderByDesc('last_message_at')
         ->get()
         ->map(function ($conversation) use ($userId) {
@@ -89,7 +92,7 @@ class ConversationsPage extends Page
             return;
         }
 
-        \App\Models\Message::create([
+        Message::create([
             'conversation_id' => $this->selectedConversationId,
             'user_id' => auth()->id(),
             'content' => $this->messageContent,
@@ -97,6 +100,75 @@ class ConversationsPage extends Page
         ]);
 
         $this->messageContent = '';
+        $this->dispatch('message-sent');
+    }
+
+    public function acceptNegotiateRequest($messageId)
+    {
+        $message = Message::find($messageId);
+        if (!$message) return;
+
+        $content = json_decode($message->content, true);
+        if ($content['type'] !== 'negotiate_request') return;
+
+        // Create a negotiate request record
+        $negotiateRequest = NegotiateRequest::create([
+            'buyer_id' => $message->user_id,
+            'seller_id' => auth()->id(),
+            'product_id' => $content['product_id'],
+            'proposed_price' => $content['proposed_price'],
+            'message' => $content['message'] ?? 'I would like to negotiate the price for this item.',
+            'expires_at' => now()->addDays(7),
+        ]);
+
+        // Update the message to show it was accepted
+        $content['status'] = 'accepted';
+        $content['negotiate_request_id'] = $negotiateRequest->id;
+        $message->update(['content' => json_encode($content)]);
+
+        $this->dispatch('message-sent');
+    }
+
+    public function declineNegotiateRequest($messageId)
+    {
+        $message = Message::find($messageId);
+        if (!$message) return;
+
+        $content = json_decode($message->content, true);
+        if ($content['type'] !== 'negotiate_request') return;
+
+        // Update the message to show it was declined
+        $content['status'] = 'declined';
+        $message->update(['content' => json_encode($content)]);
+
+        $this->dispatch('message-sent');
+    }
+
+    public function counterNegotiateRequest($messageId, $counterPrice, $counterMessage = null)
+    {
+        $message = Message::find($messageId);
+        if (!$message) return;
+
+        $content = json_decode($message->content, true);
+        if ($content['type'] !== 'negotiate_request') return;
+
+        // Create a negotiate request record
+        $negotiateRequest = NegotiateRequest::create([
+            'buyer_id' => $message->user_id,
+            'seller_id' => auth()->id(),
+            'product_id' => $content['product_id'],
+            'proposed_price' => $counterPrice,
+            'message' => $counterMessage,
+            'expires_at' => now()->addDays(7),
+        ]);
+
+        // Update the message to show it was counter offered
+        $content['status'] = 'counter_offered';
+        $content['negotiate_request_id'] = $negotiateRequest->id;
+        $content['counter_price'] = $counterPrice;
+        $content['counter_message'] = $counterMessage;
+        $message->update(['content' => json_encode($content)]);
+
         $this->dispatch('message-sent');
     }
 

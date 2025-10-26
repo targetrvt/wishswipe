@@ -15,6 +15,7 @@ return [
         'total_swipes' => 'Kopā Velk',
         'likes' => 'Patīk',
         'active' => 'Aktīvs',
+        'negotiable' => 'Sarunājams',
         'created_at' => 'Izveidots',
     ],
     
@@ -57,6 +58,7 @@ return [
         'map' => 'Karte',
         'images' => 'Attēli',
         'active' => 'Aktīvs',
+        'negotiable' => 'Sarunājams',
     ],
     
     'bulk_actions' => [
@@ -151,6 +153,7 @@ return [
         'visibility_section' => 'Redzamības Iestatījumi',
         'visibility_description' => 'Kontrolējiet, kā jūsu produkts parādās citiem lietotājiem',
         'active_helper' => 'Neaktīvi produkti netiks rādīti citiem lietotājiem',
+        'negotiable_helper' => 'Atļauj citiem lietotājiem sarunāt cenu',
         'geolocate_label' => '📍 Iegūt Manu Atrašanās Vietu',
         'map_helper' => 'Noklikšķiniet uz kartes, lai iestatītu savu atrašanās vietu, vai izmantojiet meklēšanas lodziņu un pogu "Iegūt Manu Atrašanās Vietu"',
         'latitude_label' => 'Platums',

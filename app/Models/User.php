@@ -72,4 +72,14 @@ class User extends Authenticatable implements HasAvatar
     {
         $this->notify(new ResetPasswordNotification($token));
     }
+
+    public function negotiateRequestsAsBuyer()
+    {
+        return $this->hasMany(NegotiateRequest::class, 'buyer_id');
+    }
+
+    public function negotiateRequestsAsSeller()
+    {
+        return $this->hasMany(NegotiateRequest::class, 'seller_id');
+    }
 }

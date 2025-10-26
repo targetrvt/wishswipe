@@ -123,6 +123,12 @@ class ProductResource extends Resource
                             ->options(__('listings.filament.status_options'))
                             ->required()
                             ->default('available'),
+                        
+                        Forms\Components\Toggle::make('is_negotiable')
+                            ->label(__('listings.form.negotiable'))
+                            ->default(true)
+                            ->helperText(__('listings.filament.negotiable_helper'))
+                            ->columnSpanFull(),
                     ])
                     ->columns(2)
                     ->collapsible(),
@@ -352,6 +358,11 @@ class ProductResource extends Resource
                 
                 Tables\Columns\IconColumn::make('is_active')
                     ->label(__('listings.columns.active'))
+                    ->boolean()
+                    ->sortable(),
+                
+                Tables\Columns\IconColumn::make('is_negotiable')
+                    ->label(__('listings.columns.negotiable'))
                     ->boolean()
                     ->sortable(),
                 

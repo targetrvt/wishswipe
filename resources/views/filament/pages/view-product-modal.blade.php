@@ -41,7 +41,7 @@
                     @elseif($record->condition === 'like_new') bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
                     @else bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200
                     @endif">
-                    {{ ucfirst(str_replace('_', ' ', $record->condition)) }}
+                    {{ __('listings.condition.' . $record->condition) }}
                 </span>
             </dd>
         </div>
@@ -54,7 +54,7 @@
                     @elseif($record->status === 'reserved') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
                     @else bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
                     @endif">
-                    {{ ucfirst($record->status) }}
+                    {{ __('listings.status.' . $record->status) }}
                 </span>
             </dd>
         </div>
@@ -95,7 +95,7 @@
     {{-- Metadata --}}
     <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-            <span>{{ __('listings.modal.created') }}: {{ $record->created_at->format('M d, Y') }}</span>
+            <span>{{ __('listings.modal.created_at_label', ['date' => $record->created_at->format('d.m.Y')]) }}</span>
             <span>{{ $record->created_at->diffForHumans() }}</span>
         </div>
     </div>

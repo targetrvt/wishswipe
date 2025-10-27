@@ -868,6 +868,16 @@
             },
 
             startDrag(e) {
+                // Check if the click originated from an image navigation element
+                const target = e.target;
+                if (target.classList.contains('image-navigation') || 
+                    target.classList.contains('image-dot') ||
+                    target.closest('.image-navigation') ||
+                    target.closest('.image-dot')) {
+                    // Don't start dragging if clicking on image navigation
+                    return;
+                }
+                
                 if (e.type.includes('touch')) {
                     e.preventDefault();
                 }
@@ -1004,82 +1014,108 @@
         window.currentImageIndex = 0;
         window.totalImages = 0;
 
-        window.initializeImageSlider = function() {
+        window.initializeImageSlider = function(retryCount = 0) {
             const currentCard = document.getElementById('currentCard');
-            if (!currentCard) return;
+            if (!currentCard) {
+                if (retryCount < 5) {
+                    setTimeout(() => window.initializeImageSlider(retryCount + 1), 100);
+                }
+                return;
+            }
             
-            const imageSlides = currentCard.querySelectorAll('.image-slide');
+            // Try multiple selectors to find the slides
+            let imageSlides = currentCard.querySelectorAll('.image-slide');
+            
+            // If still no slides, try searching more broadly
+            if (imageSlides.length === 0) {
+                const imageContainer = currentCard.querySelector('.image-container');
+                if (imageContainer) {
+                    imageSlides = imageContainer.querySelectorAll('.image-slide');
+                }
+            }
+            
+            // If no images found and we haven't retried too many times, retry
+            if (imageSlides.length === 0 && retryCount < 5) {
+                setTimeout(() => window.initializeImageSlider(retryCount + 1), 100);
+                return;
+            }
+            
             window.totalImages = imageSlides.length;
             window.currentImageIndex = 0;
-            console.log('Image slider initialized with', window.totalImages, 'images');
             
-            // Add click event listeners for debugging and proper event handling
+            // Attach listeners directly to buttons and dots
             const prevButton = currentCard.querySelector('.image-navigation.prev');
             const nextButton = currentCard.querySelector('.image-navigation.next');
             const dots = currentCard.querySelectorAll('.image-dot');
             
             if (prevButton) {
-                prevButton.addEventListener('click', (e) => {
-                    console.log('Prev button clicked!');
+                // Remove all listeners by cloning
+                const newPrev = prevButton.cloneNode(true);
+                prevButton.parentNode.replaceChild(newPrev, prevButton);
+                
+                newPrev.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    e.stopImmediatePropagation();
                     window.changeImage(-1);
                 });
                 
-                // Also add touch events for mobile
-                prevButton.addEventListener('touchstart', (e) => {
-                    console.log('Prev button touched!');
+                newPrev.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    e.stopImmediatePropagation();
                     window.changeImage(-1);
                 });
             }
             
             if (nextButton) {
-                nextButton.addEventListener('click', (e) => {
-                    console.log('Next button clicked!');
+                // Remove all listeners by cloning
+                const newNext = nextButton.cloneNode(true);
+                nextButton.parentNode.replaceChild(newNext, nextButton);
+                
+                newNext.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    e.stopImmediatePropagation();
                     window.changeImage(1);
                 });
                 
-                // Also add touch events for mobile
-                nextButton.addEventListener('touchstart', (e) => {
-                    console.log('Next button touched!');
+                newNext.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    e.stopImmediatePropagation();
                     window.changeImage(1);
                 });
             }
             
-            // Add event listeners for dots
-            dots.forEach((dot, index) => {
-                dot.addEventListener('click', (e) => {
-                    console.log('Dot clicked:', index);
+            // Handle dots
+            dots.forEach((dot) => {
+                const index = parseInt(dot.getAttribute('data-index'), 10);
+                const newDot = dot.cloneNode(true);
+                dot.parentNode.replaceChild(newDot, dot);
+                
+                newDot.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    e.stopImmediatePropagation();
                     window.goToImage(index);
                 });
                 
-                // Also add touch events for mobile
-                dot.addEventListener('touchstart', (e) => {
-                    console.log('Dot touched:', index);
+                newDot.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    e.stopImmediatePropagation();
                     window.goToImage(index);
                 });
             });
         }
 
         window.changeImage = function(direction) {
-            console.log('changeImage called with direction:', direction, 'totalImages:', window.totalImages);
             if (window.totalImages <= 1) {
-                console.log('Only 1 image, not changing');
                 return;
             }
 
             const newIndex = window.currentImageIndex + direction;
-            console.log('Calculated new index:', newIndex);
             
             if (newIndex >= 0 && newIndex < window.totalImages) {
                 window.goToImage(newIndex);
@@ -1091,7 +1127,6 @@
         }
 
         window.goToImage = function(index) {
-            console.log('goToImage called with index:', index, 'currentIndex:', window.currentImageIndex);
             if (window.totalImages <= 1 || index < 0 || index >= window.totalImages) return;
 
             const currentCard = document.getElementById('currentCard');
@@ -1099,8 +1134,6 @@
             
             const imageSlides = currentCard.querySelectorAll('.image-slide');
             const dots = currentCard.querySelectorAll('.image-dot');
-
-            console.log('Found slides:', imageSlides.length, 'dots:', dots.length);
 
             // Remove active class from current image and dot
             if (imageSlides[window.currentImageIndex]) {
@@ -1119,7 +1152,6 @@
             }
 
             window.currentImageIndex = index;
-            console.log('New currentIndex:', window.currentImageIndex);
         }
 
         window.addEventListener('show-match-notification', () => {
@@ -1137,6 +1169,11 @@
             window.initializeImageSlider();
         });
 
+        // Initialize immediately if DOM is already loaded
+        if (document.readyState !== 'loading') {
+            window.initializeImageSlider();
+        }
+
         // Also initialize when Livewire updates the content
         document.addEventListener('livewire:navigated', () => {
             // Ensure card has full opacity after navigation
@@ -1145,10 +1182,10 @@
                 currentCard.style.opacity = '1';
                 currentCard.style.setProperty('opacity', '1', 'important');
             }
-            setTimeout(window.initializeImageSlider, 100);
+            setTimeout(window.initializeImageSlider, 50);
         });
 
-        // Reset card state when Livewire updates
+        // Reset card state when Livewire updates (v2 event)
         document.addEventListener('livewire:updated', () => {
             const currentCard = document.getElementById('currentCard');
             if (currentCard) {
@@ -1164,9 +1201,16 @@
                 // Ensure no CSS classes are interfering with opacity
                 currentCard.style.setProperty('opacity', '1', 'important');
             }
-            // Re-initialize image slider for new product
-            setTimeout(window.initializeImageSlider, 100);
+            // Re-initialize image slider for new product with immediate call
+            window.initializeImageSlider();
         });
+
+        // Livewire 3 event hook
+        if (window.Livewire) {
+            Livewire.hook('morph.updated', () => {
+                setTimeout(window.initializeImageSlider, 50);
+            });
+        }
     </script>
     @endscript
 

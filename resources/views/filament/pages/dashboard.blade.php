@@ -30,6 +30,16 @@
         </div>
     @endif
 
+    {{-- Apex Charts Widgets --}}
+    <div class="space-y-6 mb-8">
+        @livewire(\App\Filament\Widgets\StatsChart::class)
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        @livewire(\App\Filament\Widgets\ActivityChart::class)
+        @livewire(\App\Filament\Widgets\TopProductsChart::class)
+    </div>
+
     {{-- Overview Metrics --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {{-- Active Listings --}}
@@ -105,106 +115,59 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {{-- Top Products --}}
-        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('dashboard.top_products.title') }}</h2>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('dashboard.top_products.subtitle') }}</p>
-            </div>
-            <div class="p-6">
-                @forelse($topProducts as $product)
-                    <div class="flex items-center gap-4 py-3 {{ !$loop->last ? 'border-b border-gray-100 dark:border-gray-700' : '' }}">
-                        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden flex-shrink-0">
-                            @if($product['image'])
-                                <img src="{{ Storage::url($product['image']) }}" alt="{{ $product['title'] }}" class="w-full h-full object-cover">
-                            @else
-                                <div class="w-full h-full flex items-center justify-center">
-                                    <x-heroicon-o-photo class="w-8 h-8 text-gray-400" />
-                                </div>
-                            @endif
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h3 class="font-medium text-gray-900 dark:text-white truncate">{{ $product['title'] }}</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">€{{ number_format($product['price'], 2) }}</p>
-                        </div>
-                        <div class="flex items-center gap-4 text-sm">
-                            <div class="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                                <x-heroicon-o-eye class="w-4 h-4" />
-                                <span>{{ $product['views'] }}</span>
-                            </div>
-                            <div class="flex items-center gap-1 text-pink-600 dark:text-pink-400">
-                                <x-heroicon-o-heart class="w-4 h-4" />
-                                <span>{{ $product['likes'] }}</span>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="text-center py-12">
-                        <x-heroicon-o-shopping-bag class="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                        <p class="text-gray-600 dark:text-gray-400">{{ __('dashboard.top_products.empty') }}</p>
-                        <a href="{{ route('filament.app.resources.products.create') }}" class="text-sm text-primary-600 hover:text-primary-700 mt-2 inline-block">
-                            {{ __('dashboard.top_products.create_first') }}
-                        </a>
-                    </div>
-                @endforelse
-            </div>
+    {{-- Performance Insights --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 mb-8">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('dashboard.performance.title') }}</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('dashboard.performance.subtitle') }}</p>
         </div>
-
-        {{-- Performance Insights --}}
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('dashboard.performance.title') }}</h2>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('dashboard.performance.subtitle') }}</p>
+        <div class="p-6 space-y-6">
+            {{-- Conversion Rate --}}
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('dashboard.performance.conversion_rate') }}</span>
+                    <span class="text-sm font-bold text-gray-900 dark:text-white">{{ $insights['conversion'] }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: {{ min($insights['conversion'], 100) }}%"></div>
+                </div>
             </div>
-            <div class="p-6 space-y-6">
-                {{-- Conversion Rate --}}
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('dashboard.performance.conversion_rate') }}</span>
-                        <span class="text-sm font-bold text-gray-900 dark:text-white">{{ $insights['conversion'] }}%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: {{ min($insights['conversion'], 100) }}%"></div>
-                    </div>
-                </div>
 
-                {{-- Sell-Through Rate --}}
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('dashboard.performance.sell_through_rate') }}</span>
-                        <span class="text-sm font-bold text-gray-900 dark:text-white">{{ $insights['sell_through'] }}%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div class="bg-green-600 h-2 rounded-full transition-all duration-500" style="width: {{ $insights['sell_through'] }}%"></div>
-                    </div>
+            {{-- Sell-Through Rate --}}
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('dashboard.performance.sell_through_rate') }}</span>
+                    <span class="text-sm font-bold text-gray-900 dark:text-white">{{ $insights['sell_through'] }}%</span>
                 </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div class="bg-green-600 h-2 rounded-full transition-all duration-500" style="width: {{ $insights['sell_through'] }}%"></div>
+                </div>
+            </div>
 
-                {{-- Messages --}}
-                @if($unreadMessages > 0)
-                    <div class="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
-                        <div class="flex items-center gap-3">
-                            <x-heroicon-o-chat-bubble-left-right class="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
-                            <div>
-                                <p class="font-medium text-gray-900 dark:text-white">{{ __('dashboard.performance.unread_messages', ['count' => $unreadMessages]) }}</p>
-                                <a href="{{ route('filament.app.pages.conversations-page') }}" class="text-sm text-orange-600 dark:text-orange-400 hover:underline">
-                                    {{ __('dashboard.performance.view_conversations') }}
-                                </a>
-                            </div>
+            {{-- Messages --}}
+            @if($unreadMessages > 0)
+                <div class="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <x-heroicon-o-chat-bubble-left-right class="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
+                        <div>
+                            <p class="font-medium text-gray-900 dark:text-white">{{ __('dashboard.performance.unread_messages', ['count' => $unreadMessages]) }}</p>
+                            <a href="{{ route('filament.app.pages.conversations-page') }}" class="text-sm text-orange-600 dark:text-orange-400 hover:underline">
+                                {{ __('dashboard.performance.view_conversations') }}
+                            </a>
                         </div>
                     </div>
-                @endif
+                </div>
+            @endif
 
-                {{-- Quick Stats --}}
-                <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <div>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $overview['engagement']['swipes'] }}</p>
-                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ __('dashboard.performance.total_swipes') }}</p>
-                    </div>
-                    <div>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $overview['listings']['sold'] }}</p>
-                        <p class="text-xs text-gray-600 dark:text-gray-400">{{ __('dashboard.performance.items_sold') }}</p>
-                    </div>
+            {{-- Quick Stats --}}
+            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $overview['engagement']['swipes'] }}</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">{{ __('dashboard.performance.total_swipes') }}</p>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $overview['listings']['sold'] }}</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">{{ __('dashboard.performance.items_sold') }}</p>
                 </div>
             </div>
         </div>

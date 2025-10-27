@@ -64,4 +64,32 @@ return [
             'description' => 'Velciet cauri pieejamām precēm jūsu apkārtnē',
         ],
     ],
+
+    'charts' => [
+        'stats' => [
+            'heading' => 'Sludinājumu Pārskats',
+            'subheading' => 'Jūsu sludinājumu sadalījums',
+            'labels' => [
+                'active' => 'Aktīvi',
+                'sold' => 'Pārdoti',
+                'reserved' => 'Rezervēti',
+            ],
+        ],
+        'activity' => [
+            'heading' => 'Aktivitātes Diagramma',
+            'subheading' => 'Vilkšanas un sakritības pēdējās 7 dienās',
+            'series' => [
+                'swipes' => 'Vilkšanas',
+                'matches' => 'Sakritības',
+            ],
+        ],
+        'top_products' => [
+            'heading' => 'Populārākie Produkti',
+            'subheading' => 'Visvairāk skatītie produkti',
+            'series' => [
+                'views' => 'Skatījumi',
+                'likes' => 'Patīk',
+            ],
+        ],
+    ],
 ];

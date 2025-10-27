@@ -146,47 +146,47 @@ class MyListings extends Page implements HasForms, HasTable
                         ->label(__('listings.actions.edit'))
                         ->form([
                             Forms\Components\TextInput::make('title')
-                                ->label(__('my_listings.form.title'))
+                                ->label(__('listings.form.title'))
                                 ->required()
                                 ->maxLength(255),
                             
                             Forms\Components\Textarea::make('description')
-                                ->label(__('my_listings.form.description'))
+                                ->label(__('listings.form.description'))
                                 ->required()
                                 ->rows(4),
                             
                             Forms\Components\Select::make('category_id')
-                                ->label(__('my_listings.form.category'))
+                                ->label(__('listings.form.category'))
                                 ->options(fn () => Category::where('is_active', true)->pluck('name', 'id'))
                                 ->required()
                                 ->searchable(),
                             
                             Forms\Components\TextInput::make('price')
-                                ->label(__('my_listings.form.price'))
+                                ->label(__('listings.form.price'))
                                 ->required()
                                 ->numeric()
                                 ->prefix('€'),
                             
                             Forms\Components\Select::make('condition')
-                                ->label(__('my_listings.form.condition'))
+                                ->label(__('listings.form.condition'))
                                 ->options([
-                                    'new' => __('my_listings.condition.new'),
-                                    'like_new' => __('my_listings.condition.like_new'),
-                                    'used' => __('my_listings.condition.used'),
+                                    'new' => __('listings.condition.new'),
+                                    'like_new' => __('listings.condition.like_new'),
+                                    'used' => __('listings.condition.used'),
                                 ])
                                 ->required(),
                             
                             Forms\Components\Select::make('status')
-                                ->label(__('my_listings.form.status'))
+                                ->label(__('listings.form.status'))
                                 ->options([
-                                    'available' => __('my_listings.status.available'),
-                                    'reserved' => __('my_listings.status.reserved'),
-                                    'sold' => __('my_listings.status.sold'),
+                                    'available' => __('listings.status.available'),
+                                    'reserved' => __('listings.status.reserved'),
+                                    'sold' => __('listings.status.sold'),
                                 ])
                                 ->required(),
                             
                             Geocomplete::make('location_address')
-                                ->label(__('my_listings.form.location'))
+                                ->label(__('listings.form.location'))
                                 ->isLocation()
                                 ->default([])
                                 ->reverseGeocode([
@@ -196,11 +196,11 @@ class MyListings extends Page implements HasForms, HasTable
                                     'country' => '%c',
                                 ])
                                 ->countries(['us', 'gb', 'lv'])
-                                ->placeholder(__('my_listings.form.location_placeholder'))
+                                ->placeholder(__('listings.filament.location_placeholder'))
                                 ->columnSpanFull(),
                             
                             Map::make('location')
-                                ->label(__('my_listings.form.map'))
+                                ->label(__('listings.filament.map_label'))
                                 ->mapControls([
                                     'mapTypeControl' => true,
                                     'scaleControl' => true,
@@ -220,19 +220,19 @@ class MyListings extends Page implements HasForms, HasTable
                                 ->columnSpanFull(),
                             
                             Forms\Components\FileUpload::make('images')
-                                ->label(__('my_listings.form.images'))
+                                ->label(__('listings.form.images'))
                                 ->multiple()
                                 ->image()
                                 ->maxFiles(5)
                                 ->directory('product-images'),
                             
                             Forms\Components\Toggle::make('is_active')
-                                ->label(__('my_listings.form.active')),
+                                ->label(__('listings.form.active')),
                         ])
                         ->modalWidth('5xl'),
                     
                     Tables\Actions\Action::make('mark_sold')
-                        ->label(__('my_listings.actions.mark_sold'))
+                        ->label(__('listings.actions.mark_sold'))
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->requiresConfirmation()
@@ -240,7 +240,7 @@ class MyListings extends Page implements HasForms, HasTable
                         ->action(fn ($record) => $record->update(['status' => 'sold'])),
                     
                     Tables\Actions\Action::make('mark_available')
-                        ->label(__('my_listings.actions.mark_available'))
+                        ->label(__('listings.actions.mark_available'))
                         ->icon('heroicon-o-arrow-path')
                         ->color('info')
                         ->requiresConfirmation()
@@ -248,23 +248,23 @@ class MyListings extends Page implements HasForms, HasTable
                         ->action(fn ($record) => $record->update(['status' => 'available'])),
                     
                     Tables\Actions\DeleteAction::make()
-                        ->label(__('my_listings.actions.delete')),
+                        ->label(__('listings.actions.delete')),
                 ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
-                        ->label(__('my_listings.bulk_actions.delete')),
+                        ->label(__('listings.bulk_actions.delete')),
                     
                     Tables\Actions\BulkAction::make('mark_available')
-                        ->label(__('my_listings.bulk_actions.mark_available'))
+                        ->label(__('listings.bulk_actions.mark_available'))
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->requiresConfirmation()
                         ->action(fn ($records) => $records->each->update(['status' => 'available'])),
                     
                     Tables\Actions\BulkAction::make('mark_sold')
-                        ->label(__('my_listings.bulk_actions.mark_sold'))
+                        ->label(__('listings.bulk_actions.mark_sold'))
                         ->icon('heroicon-o-x-circle')
                         ->color('danger')
                         ->requiresConfirmation()
@@ -273,7 +273,7 @@ class MyListings extends Page implements HasForms, HasTable
             ])
             ->emptyStateActions([
                 Tables\Actions\Action::make('create')
-                    ->label(__('my_listings.empty_state.create_first'))
+                    ->label(__('listings.empty_state.create_first'))
                     ->url(fn (): string => route('filament.app.resources.products.create'))
                     ->icon('heroicon-m-plus')
                     ->button(),

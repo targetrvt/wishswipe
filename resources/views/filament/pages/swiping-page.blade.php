@@ -239,6 +239,14 @@
             flex-direction: column;
             justify-content: space-between;
             overflow-y: auto;
+            min-height: 0;
+        }
+        
+        .card-content > div {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
         }
 
         .card-title {
@@ -250,6 +258,8 @@
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            line-height: 1.3;
+            max-height: 3.6em;
         }
 
         .card-description {
@@ -1094,7 +1104,7 @@
                     </div>
 
                     <div class="card-content">
-                        <div>
+                        <div style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
                             <h3 class="card-title">{{ $currentProduct['title'] }}</h3>
                             
                             @if($currentProduct['description'])
@@ -1104,7 +1114,7 @@
                                     $isLong = strlen($description) > $maxLength;
                                     $truncated = $isLong ? substr($description, 0, $maxLength) . '...' : $description;
                                 @endphp
-                                <div>
+                                <div style="flex: 1; min-height: 0; overflow-y: auto;">
                                     <p class="card-description {{ $isLong ? 'truncated' : '' }}">
                                         {{ $truncated }}
                                     </p>
@@ -1116,7 +1126,7 @@
                                 </div>
                             @endif
                             
-                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0; margin-top: auto;">
                                 <div class="card-info">
                                     <span class="card-price">€{{ number_format($currentProduct['price'], 2) }}</span>
                                     @if($currentProduct['location'])
@@ -1130,7 +1140,7 @@
                                     @endif
                                 </div>
                                 @if($currentProduct['is_negotiable'] ?? false)
-                                    <span class="card-badge" style="background: rgba(139, 92, 246, 0.95); color: white; backdrop-filter: blur(10px); display: inline-flex; align-items: center; gap: 0.25rem; width: fit-content;">
+                                    <span class="card-badge" style="background: rgba(139, 92, 246, 0.95); color: white; backdrop-filter: blur(10px); display: inline-flex; align-items: center; gap: 0.25rem; width: fit-content; flex-shrink: 0;">
                                         <svg style="width: 14px; height: 14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                         </svg>

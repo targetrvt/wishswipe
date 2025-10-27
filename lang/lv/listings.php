@@ -124,6 +124,7 @@ return [
         'views' => 'Skatījumi',
         'description' => 'Apraksts',
         'created' => 'Izveidots',
+        'created_at_label' => 'Izveidots: :date',
         'uncategorized' => 'Bez kategorijas',
     ],
 
@@ -147,6 +148,8 @@ return [
         ],
         'location_placeholder' => 'Meklēt atrašanās vietu...',
         'location_helper' => 'Ievadiet atrašanās vietu, kur prece ir pieejama',
+        'location_search_helper' => 'Ierakstiet atrašanās vietu, lai meklētu, vai noklikšķiniet uz kartes zemāk, lai automātiski aizpildītu',
+        'map_label' => 'Karte',
         'images_section' => 'Produkta Attēli',
         'images_description' => 'Augšupielādējiet līdz 10 augstas kvalitātes attēlus savam produktam',
         'images_helper' => 'Pirmais attēls tiks izmantots kā galvenais foto',
@@ -183,11 +186,40 @@ return [
         'bulk_deactivate_label' => 'Deaktivizēt',
         
         // Notifications
+        'product_created' => 'Produkts veiksmīgi izveidots',
         'product_marked_sold' => 'Produkts atzīmēts kā pārdots',
         'product_marked_available' => 'Produkts atzīmēts kā pieejams',
-        'product_updated' => 'Produkts atjaunināts',
+        'product_updated' => 'Produkts veiksmīgi atjaunināts',
         
         // Empty State
         'create_first_product' => 'Izveidot savu pirmo produktu',
+        
+        // Confirmation Modals
+        'confirm' => 'Apstiprināt',
+        'cancel' => 'Atcelt',
+        'close' => 'Aizvērt',
+        'view_product_heading' => 'Produkta Detaļas',
+        'mark_sold_confirm_heading' => 'Atzīmēt kā Pārdots',
+        'mark_sold_confirm_description' => 'Vai tiešām vēlaties atzīmēt šo produktu kā pārdotu?',
+        'mark_available_confirm_heading' => 'Atzīmēt kā Pieejams',
+        'mark_available_confirm_description' => 'Vai tiešām vēlaties atzīmēt šo produktu kā pieejamu?',
+        'activate_confirm_heading' => 'Aktivizēt Produktu',
+        'activate_confirm_description' => 'Vai tiešām vēlaties aktivizēt šo produktu?',
+        'deactivate_confirm_heading' => 'Deaktivizēt Produktu',
+        'deactivate_confirm_description' => 'Vai tiešām vēlaties deaktivizēt šo produktu?',
+        'delete_confirm_heading' => 'Dzēst Produktu',
+        'delete_confirm_description' => 'Vai tiešām vēlaties dzēst šo produktu? Šo darbību nevar atsaukt.',
+        
+        // Bulk Action Confirmations
+        'bulk_mark_available_confirm_heading' => 'Atzīmēt kā Pieejams',
+        'bulk_mark_available_confirm_description' => 'Vai tiešām vēlaties atzīmēt izvēlētos produktus kā pieejamus?',
+        'bulk_mark_sold_confirm_heading' => 'Atzīmēt kā Pārdots',
+        'bulk_mark_sold_confirm_description' => 'Vai tiešām vēlaties atzīmēt izvēlētos produktus kā pārdotus?',
+        'bulk_activate_confirm_heading' => 'Aktivizēt Produktus',
+        'bulk_activate_confirm_description' => 'Vai tiešām vēlaties aktivizēt izvēlētos produktus?',
+        'bulk_deactivate_confirm_heading' => 'Deaktivizēt Produktus',
+        'bulk_deactivate_confirm_description' => 'Vai tiešām vēlaties deaktivizēt izvēlētos produktus?',
+        'bulk_delete_confirm_heading' => 'Dzēst Produktus',
+        'bulk_delete_confirm_description' => 'Vai tiešām vēlaties dzēst izvēlētos produktus? Šo darbību nevar atsaukt.',
     ],
 ];

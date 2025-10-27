@@ -30,6 +30,16 @@ class ProductResource extends Resource
         return __('listings.navigation_label');
     }
     
+    public static function getModelLabel(): string
+    {
+        return __('listings.new_listing');
+    }
+    
+    public static function getRecordTitleAttribute(): ?string
+    {
+        return 'title';
+    }
+    
     public static function getNavigationGroup(): ?string
     {
         return __('navigation.groups.marketplace');
@@ -140,7 +150,7 @@ class ProductResource extends Resource
                             ->label(__('listings.form.location'))
                             ->maxLength(255)
                             ->placeholder(__('listings.filament.location_placeholder'))
-                            ->helperText('Type a location to search, or click on the map below to auto-fill')
+                            ->helperText(__('listings.filament.location_search_helper'))
                             ->reactive()
                             ->debounce(1000)
                             ->columnSpanFull(),
@@ -409,7 +419,11 @@ class ProductResource extends Resource
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make()
-                        ->label(__('listings.actions.view')),
+                        ->label(__('listings.actions.view'))
+                        ->modalHeading(__('listings.filament.view_product_heading'))
+                        ->modalContent(fn ($record) => view('filament.pages.view-product-modal', ['record' => $record]))
+                        ->modalSubmitAction(false)
+                        ->modalCancelActionLabel(__('listings.filament.close')),
                     Tables\Actions\EditAction::make()
                         ->label(__('listings.actions.edit')),
                     
@@ -418,6 +432,10 @@ class ProductResource extends Resource
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->requiresConfirmation()
+                        ->modalHeading(__('listings.filament.mark_sold_confirm_heading'))
+                        ->modalDescription(__('listings.filament.mark_sold_confirm_description'))
+                        ->modalSubmitActionLabel(__('listings.filament.confirm'))
+                        ->modalCancelActionLabel(__('listings.filament.cancel'))
                         ->visible(fn ($record) => $record->status !== 'sold')
                         ->action(function ($record) {
                             $record->update(['status' => 'sold']);
@@ -432,6 +450,10 @@ class ProductResource extends Resource
                         ->icon('heroicon-o-arrow-path')
                         ->color('info')
                         ->requiresConfirmation()
+                        ->modalHeading(__('listings.filament.mark_available_confirm_heading'))
+                        ->modalDescription(__('listings.filament.mark_available_confirm_description'))
+                        ->modalSubmitActionLabel(__('listings.filament.confirm'))
+                        ->modalCancelActionLabel(__('listings.filament.cancel'))
                         ->visible(fn ($record) => $record->status === 'sold')
                         ->action(function ($record) {
                             $record->update(['status' => 'available']);
@@ -446,6 +468,10 @@ class ProductResource extends Resource
                         ->icon(fn ($record) => $record->is_active ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
                         ->color(fn ($record) => $record->is_active ? 'warning' : 'success')
                         ->requiresConfirmation()
+                        ->modalHeading(fn ($record) => $record->is_active ? __('listings.filament.deactivate_confirm_heading') : __('listings.filament.activate_confirm_heading'))
+                        ->modalDescription(fn ($record) => $record->is_active ? __('listings.filament.deactivate_confirm_description') : __('listings.filament.activate_confirm_description'))
+                        ->modalSubmitActionLabel(__('listings.filament.confirm'))
+                        ->modalCancelActionLabel(__('listings.filament.cancel'))
                         ->action(function ($record) {
                             $record->update(['is_active' => !$record->is_active]);
                             Notification::make()
@@ -467,6 +493,10 @@ class ProductResource extends Resource
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->requiresConfirmation()
+                        ->modalHeading(__('listings.filament.bulk_mark_available_confirm_heading'))
+                        ->modalDescription(__('listings.filament.bulk_mark_available_confirm_description'))
+                        ->modalSubmitActionLabel(__('listings.filament.confirm'))
+                        ->modalCancelActionLabel(__('listings.filament.cancel'))
                         ->action(fn ($records) => $records->each->update(['status' => 'available'])),
                     
                     Tables\Actions\BulkAction::make('mark_sold')
@@ -474,6 +504,10 @@ class ProductResource extends Resource
                         ->icon('heroicon-o-x-circle')
                         ->color('danger')
                         ->requiresConfirmation()
+                        ->modalHeading(__('listings.filament.bulk_mark_sold_confirm_heading'))
+                        ->modalDescription(__('listings.filament.bulk_mark_sold_confirm_description'))
+                        ->modalSubmitActionLabel(__('listings.filament.confirm'))
+                        ->modalCancelActionLabel(__('listings.filament.cancel'))
                         ->action(fn ($records) => $records->each->update(['status' => 'sold'])),
                     
                     Tables\Actions\BulkAction::make('activate')
@@ -481,6 +515,10 @@ class ProductResource extends Resource
                         ->icon('heroicon-o-eye')
                         ->color('success')
                         ->requiresConfirmation()
+                        ->modalHeading(__('listings.filament.bulk_activate_confirm_heading'))
+                        ->modalDescription(__('listings.filament.bulk_activate_confirm_description'))
+                        ->modalSubmitActionLabel(__('listings.filament.confirm'))
+                        ->modalCancelActionLabel(__('listings.filament.cancel'))
                         ->action(fn ($records) => $records->each->update(['is_active' => true])),
                     
                     Tables\Actions\BulkAction::make('deactivate')
@@ -488,10 +526,18 @@ class ProductResource extends Resource
                         ->icon('heroicon-o-eye-slash')
                         ->color('warning')
                         ->requiresConfirmation()
+                        ->modalHeading(__('listings.filament.bulk_deactivate_confirm_heading'))
+                        ->modalDescription(__('listings.filament.bulk_deactivate_confirm_description'))
+                        ->modalSubmitActionLabel(__('listings.filament.confirm'))
+                        ->modalCancelActionLabel(__('listings.filament.cancel'))
                         ->action(fn ($records) => $records->each->update(['is_active' => false])),
                     
                     Tables\Actions\DeleteBulkAction::make()
-                        ->label(__('listings.actions.delete')),
+                        ->label(__('listings.actions.delete'))
+                        ->modalHeading(__('listings.filament.bulk_delete_confirm_heading'))
+                        ->modalDescription(__('listings.filament.bulk_delete_confirm_description'))
+                        ->modalSubmitActionLabel(__('listings.filament.confirm'))
+                        ->modalCancelActionLabel(__('listings.filament.cancel')),
                 ]),
             ])
             ->emptyStateActions([

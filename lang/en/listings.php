@@ -124,6 +124,7 @@ return [
         'views' => 'Views',
         'description' => 'Description',
         'created' => 'Created',
+        'created_at_label' => 'Created: :date',
         'uncategorized' => 'Uncategorized',
     ],
 
@@ -147,6 +148,8 @@ return [
         ],
         'location_placeholder' => 'Search for a location...',
         'location_helper' => 'Enter the location where the item is available',
+        'location_search_helper' => 'Type a location to search, or click on the map below to auto-fill',
+        'map_label' => 'Map',
         'images_section' => 'Product Images',
         'images_description' => 'Upload up to 10 high-quality images of your product',
         'images_helper' => 'First image will be used as the main photo',
@@ -183,11 +186,40 @@ return [
         'bulk_deactivate_label' => 'Deactivate',
         
         // Notifications
+        'product_created' => 'Product created successfully',
         'product_marked_sold' => 'Product marked as sold',
         'product_marked_available' => 'Product marked as available',
-        'product_updated' => 'Product updated',
+        'product_updated' => 'Product updated successfully',
         
         // Empty State
         'create_first_product' => 'Create your first product',
+        
+        // Confirmation Modals
+        'confirm' => 'Confirm',
+        'cancel' => 'Cancel',
+        'close' => 'Close',
+        'view_product_heading' => 'Product Details',
+        'mark_sold_confirm_heading' => 'Mark as Sold',
+        'mark_sold_confirm_description' => 'Are you sure you want to mark this product as sold?',
+        'mark_available_confirm_heading' => 'Mark as Available',
+        'mark_available_confirm_description' => 'Are you sure you want to mark this product as available?',
+        'activate_confirm_heading' => 'Activate Product',
+        'activate_confirm_description' => 'Are you sure you want to activate this product?',
+        'deactivate_confirm_heading' => 'Deactivate Product',
+        'deactivate_confirm_description' => 'Are you sure you want to deactivate this product?',
+        'delete_confirm_heading' => 'Delete Product',
+        'delete_confirm_description' => 'Are you sure you want to delete this product? This action cannot be undone.',
+        
+        // Bulk Action Confirmations
+        'bulk_mark_available_confirm_heading' => 'Mark as Available',
+        'bulk_mark_available_confirm_description' => 'Are you sure you want to mark selected products as available?',
+        'bulk_mark_sold_confirm_heading' => 'Mark as Sold',
+        'bulk_mark_sold_confirm_description' => 'Are you sure you want to mark selected products as sold?',
+        'bulk_activate_confirm_heading' => 'Activate Products',
+        'bulk_activate_confirm_description' => 'Are you sure you want to activate selected products?',
+        'bulk_deactivate_confirm_heading' => 'Deactivate Products',
+        'bulk_deactivate_confirm_description' => 'Are you sure you want to deactivate selected products?',
+        'bulk_delete_confirm_heading' => 'Delete Products',
+        'bulk_delete_confirm_description' => 'Are you sure you want to delete selected products? This action cannot be undone.',
     ],
 ];

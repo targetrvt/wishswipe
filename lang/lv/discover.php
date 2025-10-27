@@ -44,6 +44,8 @@ return [
     
     'card' => [
         'uncategorized' => 'Bez Kategorijas',
+        'read_more' => 'Lasīt vairāk',
+        'read_less' => 'Paslēpt',
     ],
     
     'conditions' => [

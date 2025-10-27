@@ -21,16 +21,6 @@ class Dashboard extends BaseDashboard
         return __('dashboard.navigation_label');
     }
 
-    public function getWidgets(): array
-    {
-        return [];
-    }
-
-    public function getColumns(): int | string | array
-    {
-        return 2;
-    }
-
     /**
      * Get overview metrics
      */

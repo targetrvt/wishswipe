@@ -64,4 +64,32 @@ return [
             'description' => 'Swipe through available items in your area',
         ],
     ],
+
+    'charts' => [
+        'stats' => [
+            'heading' => 'Listings Overview',
+            'subheading' => 'Distribution of your listings',
+            'labels' => [
+                'active' => 'Active',
+                'sold' => 'Sold',
+                'reserved' => 'Reserved',
+            ],
+        ],
+        'activity' => [
+            'heading' => 'Engagement Activity',
+            'subheading' => 'Swipes and matches over the last 7 days',
+            'series' => [
+                'swipes' => 'Swipes',
+                'matches' => 'Matches',
+            ],
+        ],
+        'top_products' => [
+            'heading' => 'Top Products',
+            'subheading' => 'Most viewed products',
+            'series' => [
+                'views' => 'Views',
+                'likes' => 'Likes',
+            ],
+        ],
+    ],
 ];

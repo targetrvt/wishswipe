@@ -44,6 +44,8 @@ return [
     
     'card' => [
         'uncategorized' => 'Uncategorized',
+        'read_more' => 'Read more',
+        'read_less' => 'Read less',
     ],
     
     'conditions' => [

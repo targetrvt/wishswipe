@@ -2,6 +2,7 @@
     <style>
         .conversations-container {
             height: calc(100vh - 8rem);
+            max-height: 800px;
             display: grid;
             grid-template-columns: 380px 1fr;
             gap: 0;
@@ -9,20 +10,259 @@
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            position: relative;
         }
 
         @media (max-width: 1024px) {
             .conversations-container {
                 grid-template-columns: 1fr;
+                height: calc(100vh - 6rem);
             }
+            
             .conversations-sidebar {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 10;
                 display: none;
+                box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
             }
+            
             .conversations-sidebar.mobile-visible {
                 display: flex;
             }
+            
+            .chat-area {
+                width: 100%;
+                height: 100%;
+                position: relative;
+                z-index: 11;
+            }
+            
             .chat-area.mobile-hidden {
                 display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .negotiate-card {
+                max-width: 100%;
+            }
+            
+            .message-bubble {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .conversations-container {
+                height: calc(100vh - 4rem);
+                border-radius: 12px;
+            }
+            
+            .sidebar-header {
+                padding: 16px;
+            }
+            
+            .sidebar-title {
+                font-size: 16px;
+            }
+            
+            .chat-header {
+                padding: 16px;
+            }
+            
+            .chat-user-name {
+                font-size: 15px;
+            }
+            
+            .chat-product-name {
+                font-size: 12px;
+            }
+            
+            .product-price {
+                font-size: 16px;
+            }
+            
+            .message-input-container {
+                padding: 12px 16px;
+            }
+            
+            .conversation-item {
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .conversation-name {
+                font-size: 13px;
+            }
+            
+            .conversation-preview {
+                font-size: 12px;
+            }
+            
+            .conversation-time {
+                font-size: 11px;
+            }
+            
+            .messages-container {
+                padding: 16px;
+                gap: 12px;
+            }
+            
+            .message-bubble {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .conversations-container {
+                height: calc(100vh - 3rem);
+                border-radius: 8px;
+            }
+            
+            .sidebar-header {
+                padding: 12px;
+            }
+            
+            .sidebar-title {
+                font-size: 15px;
+            }
+            
+            .chat-header {
+                padding: 12px;
+            }
+            
+            .chat-user-name {
+                font-size: 14px;
+            }
+            
+            .chat-product-name {
+                font-size: 11px;
+            }
+            
+            .product-price {
+                font-size: 15px;
+            }
+            
+            .chat-header-left {
+                gap: 8px;
+            }
+            
+            .conversation-item {
+                padding: 8px;
+                gap: 8px;
+            }
+            
+            .conversation-name {
+                font-size: 12px;
+            }
+            
+            .conversation-preview {
+                font-size: 11px;
+            }
+            
+            .conversation-time {
+                font-size: 10px;
+            }
+            
+            .messages-container {
+                padding: 12px;
+                gap: 10px;
+            }
+            
+            .message-bubble {
+                padding: 7px 10px;
+                font-size: 12px;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                hyphens: auto;
+            }
+            
+            .message-content {
+                max-width: 90%;
+            }
+            
+            .message-input-container {
+                padding: 10px 12px;
+            }
+            
+            .message-textarea {
+                font-size: 13px;
+                padding: 8px 12px;
+            }
+            
+            .send-button {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .send-button svg {
+                width: 18px;
+                height: 18px;
+            }
+            
+            .back-button {
+                padding: 6px;
+            }
+            
+            .back-button svg {
+                width: 18px;
+                height: 18px;
+            }
+            
+            /* Smaller avatars on tiny phones */
+            .conversation-item .w-10,
+            .conversation-item .h-10 {
+                width: 2rem;
+                height: 2rem;
+            }
+            
+            .chat-header .w-10,
+            .chat-header .h-10 {
+                width: 2rem;
+                height: 2rem;
+            }
+            
+            .message-avatar.w-8,
+            .message-avatar.h-8 {
+                width: 1.75rem;
+                height: 1.75rem;
+            }
+            
+            /* Smaller negotiate cards */
+            .negotiate-header {
+                padding: 10px 12px;
+            }
+            
+            .negotiate-body {
+                padding: 12px;
+            }
+            
+            .negotiate-price {
+                font-size: 14px;
+            }
+            
+            .negotiate-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            
+            .negotiate-btn svg {
+                width: 14px;
+                height: 14px;
             }
         }
 
@@ -79,6 +319,10 @@
             border: none;
             width: 100%;
             text-align: left;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .conversation-item:hover {
@@ -276,11 +520,13 @@
         .messages-container {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 24px;
             display: flex;
             flex-direction: column;
             gap: 16px;
             background: #fafafa;
+            min-width: 0;
         }
 
         .dark .messages-container {
@@ -291,6 +537,8 @@
             display: flex;
             gap: 8px;
             align-items: flex-end;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .message-wrapper.own {
@@ -305,7 +553,8 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
-            max-width: 60%;
+            max-width: 75%;
+            min-width: 0;
         }
 
         .message-wrapper.own .message-content {
@@ -316,8 +565,13 @@
             padding: 10px 14px;
             border-radius: 16px;
             word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
             font-size: 14px;
             line-height: 1.5;
+            overflow: hidden;
+            min-width: 0;
         }
 
         .message-bubble.other {
@@ -471,19 +725,25 @@
             border: none;
             cursor: pointer;
             color: #6b7280;
+            transition: all 0.15s ease;
         }
 
         .back-button:hover {
             background: #f3f4f6;
+            color: #111827;
         }
 
         .dark .back-button:hover {
             background: #374151;
+            color: #f9fafb;
         }
 
         @media (max-width: 1024px) {
             .back-button {
-                display: block;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 8px;
             }
         }
 
@@ -517,6 +777,10 @@
             overflow: hidden;
             max-width: 420px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            min-width: 0;
         }
 
         .dark .negotiate-card {
@@ -905,9 +1169,9 @@
         }
     </style>
 
-    <div class="conversations-container" wire:poll.5s>
+    <div class="conversations-container" wire:poll.5s x-data="{ showSidebar: true }" @hide-sidebar.window="showSidebar = false">
         <!-- Conversations Sidebar -->
-        <div class="conversations-sidebar" x-data="{ mobileVisible: true }">
+        <div class="conversations-sidebar" :class="{ 'mobile-visible': showSidebar }">
             <div class="sidebar-header">
                 <h2 class="sidebar-title">{{ __('conversations.sidebar.title') }}</h2>
             </div>
@@ -916,7 +1180,7 @@
                 @forelse($this->conversations as $conv)
                     <button
                         wire:click="selectConversation({{ $conv['id'] }})"
-                        @click="if(window.innerWidth < 1024) mobileVisible = false"
+                        onclick="if(window.innerWidth < 1024) { window.dispatchEvent(new CustomEvent('hide-sidebar')); }"
                         class="conversation-item {{ $selectedConversationId === $conv['id'] ? 'active' : '' }}">
                         
                         <div class="conversation-avatar">
@@ -1001,10 +1265,10 @@
 
         <!-- Chat Area -->
         @if($this->selectedConversation)
-            <div class="chat-area" x-data="{ mobileHidden: false }">
+            <div class="chat-area" :class="{ 'mobile-hidden': showSidebar }">
                 <div class="chat-header">
                     <div class="chat-header-left">
-                        <button class="back-button" @click="mobileVisible = true; mobileHidden = true">
+                        <button class="back-button" @click="showSidebar = true">
                             <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                             </svg>
@@ -1261,7 +1525,7 @@
                 </div>
             </div>
         @else
-            <div class="chat-area">
+            <div class="chat-area" :class="{ 'mobile-hidden': showSidebar }">
                 <div class="empty-state">
                     <div class="empty-state-content">
                         <svg class="empty-state-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">

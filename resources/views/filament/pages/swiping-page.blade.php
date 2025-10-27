@@ -1090,14 +1090,6 @@
                             ">
                                 {{ __(sprintf('discover.conditions.%s', $currentProduct['condition'])) }}
                             </span>
-                            @if($currentProduct['is_negotiable'] ?? false)
-                                <span class="card-badge" style="background: rgba(139, 92, 246, 0.95); color: white; backdrop-filter: blur(10px); display: flex; align-items: center; gap: 0.25rem;">
-                                    <svg style="width: 14px; height: 14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                                    </svg>
-                                    Negotiable
-                                </span>
-                            @endif
                         </div>
                     </div>
 
@@ -1124,15 +1116,25 @@
                                 </div>
                             @endif
                             
-                            <div class="card-info">
-                                <span class="card-price">€{{ number_format($currentProduct['price'], 2) }}</span>
-                                @if($currentProduct['location'])
-                                    <span style="font-size: 0.875rem; color: #6b7280; display: flex; align-items: center; gap: 0.25rem;">
-                                        <svg style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                <div class="card-info">
+                                    <span class="card-price">€{{ number_format($currentProduct['price'], 2) }}</span>
+                                    @if($currentProduct['location'])
+                                        <span style="font-size: 0.875rem; color: #6b7280; display: flex; align-items: center; gap: 0.25rem;">
+                                            <svg style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                            {{ $currentProduct['location'] }}
+                                        </span>
+                                    @endif
+                                </div>
+                                @if($currentProduct['is_negotiable'] ?? false)
+                                    <span class="card-badge" style="background: rgba(139, 92, 246, 0.95); color: white; backdrop-filter: blur(10px); display: inline-flex; align-items: center; gap: 0.25rem; width: fit-content;">
+                                        <svg style="width: 14px; height: 14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                         </svg>
-                                        {{ $currentProduct['location'] }}
+                                        Negotiable
                                     </span>
                                 @endif
                             </div>

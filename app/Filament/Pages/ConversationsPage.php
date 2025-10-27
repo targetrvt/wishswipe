@@ -38,7 +38,7 @@ class ConversationsPage extends Page
             $query->where('buyer_id', $userId)
                 ->orWhere('seller_id', $userId);
         })
-        ->with(['matched.buyer', 'matched.seller', 'product', 'latestMessage'])
+        ->with(['matched.buyer', 'matched.seller', 'product.category', 'product.user', 'latestMessage'])
         ->orderByDesc('created_at')
         ->orderByDesc('last_message_at')
         ->get()
@@ -64,7 +64,13 @@ class ConversationsPage extends Page
             return null;
         }
 
-        $conversation = Conversation::with(['matched.buyer', 'matched.seller', 'product', 'messages.user'])
+        $conversation = Conversation::with([
+            'matched.buyer', 
+            'matched.seller', 
+            'product.category', 
+            'product.user',
+            'messages.user'
+        ])
             ->find($this->selectedConversationId);
 
         if (!$conversation) {

@@ -1167,6 +1167,397 @@
         .counter-modal-btn.submit:hover {
             background: #2563eb;
         }
+
+        /* Product Modal Styles - Reused from Swiping Page */
+        .product-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .product-modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .product-modal {
+            background: white;
+            border-radius: 24px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .product-modal-overlay.show .product-modal {
+            transform: scale(1);
+        }
+
+        .dark .product-modal {
+            background: #1f2937;
+        }
+
+        .product-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .dark .product-modal-header {
+            background: #1f2937;
+            border-bottom-color: #374151;
+        }
+
+        .product-modal-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+            margin: 0;
+        }
+
+        .dark .product-modal-header h2 {
+            color: #f9fafb;
+        }
+
+        .product-modal-close {
+            background: #f3f4f6;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            color: #6b7280;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-modal-close:hover {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .dark .product-modal-close {
+            background: #374151;
+            color: #9ca3af;
+        }
+
+        .dark .product-modal-close:hover {
+            background: #4b5563;
+            color: #f9fafb;
+        }
+
+        .product-modal-close svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .product-modal-body {
+            padding: 2rem;
+        }
+
+        .product-modal-image-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            margin-bottom: 1.5rem;
+            border-radius: 16px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .product-modal-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+
+        .product-modal-nav:hover {
+            background: rgba(0, 0, 0, 0.8);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .product-modal-nav-prev {
+            left: 15px;
+        }
+
+        .product-modal-nav-next {
+            right: 15px;
+        }
+
+        .product-modal-dots {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .product-modal-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0;
+        }
+
+        .product-modal-dot.active {
+            background: rgba(255, 255, 255, 0.9);
+            transform: scale(1.2);
+        }
+
+        .product-modal-content {
+            margin-bottom: 1.5rem;
+        }
+
+        .product-modal-price {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .product-modal-description {
+            font-size: 1rem;
+            color: #4b5563;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .dark .product-modal-description {
+            color: #d1d5db;
+        }
+
+        .product-modal-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .dark .product-modal-meta {
+            border-top-color: #374151;
+        }
+
+        .product-modal-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .dark .product-modal-meta-item {
+            color: #9ca3af;
+        }
+
+        .product-modal-meta-item svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .product-modal-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .product-modal-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .view-product-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            color: #3b82f6;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .view-product-btn:hover {
+            background: #f3f4f6;
+            color: #2563eb;
+        }
+
+        .dark .view-product-btn {
+            color: #60a5fa;
+        }
+
+        .dark .view-product-btn:hover {
+            background: #374151;
+            color: #93c5fd;
+        }
+
+        .view-product-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .view-product-btn span {
+            display: inline;
+        }
+
+        @media (max-width: 640px) {
+            .view-product-btn span {
+                display: none;
+            }
+        }
+
+        .clickable-text {
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: underline;
+            text-decoration-color: transparent;
+        }
+
+        .clickable-text:hover {
+            text-decoration-color: currentColor;
+            opacity: 0.8;
+        }
+
+        .chat-product-name.clickable-text {
+            color: #6b7280;
+        }
+
+        .chat-product-name.clickable-text:hover {
+            color: #3b82f6;
+        }
+
+        .dark .chat-product-name.clickable-text {
+            color: #9ca3af;
+        }
+
+        .dark .chat-product-name.clickable-text:hover {
+            color: #60a5fa;
+        }
+
+        .conversation-product.clickable-text {
+            color: #6b7280;
+        }
+
+        .conversation-product.clickable-text:hover {
+            color: #3b82f6;
+        }
+
+        .dark .conversation-product.clickable-text {
+            color: #9ca3af;
+        }
+
+        .dark .conversation-product.clickable-text:hover {
+            color: #60a5fa;
+        }
+
+        @media (max-width: 640px) {
+            .product-modal {
+                width: 95%;
+                max-height: 95vh;
+                border-radius: 16px;
+            }
+
+            .product-modal-header {
+                padding: 1.5rem;
+            }
+
+            .product-modal-header h2 {
+                font-size: 1.25rem;
+            }
+
+            .product-modal-body {
+                padding: 1.5rem;
+            }
+
+            .product-modal-image-container {
+                height: 300px;
+            }
+
+            .product-modal-nav {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+
+            .product-modal-nav-prev {
+                left: 10px;
+            }
+
+            .product-modal-nav-next {
+                right: 10px;
+            }
+
+            .product-modal-dot {
+                width: 8px;
+                height: 8px;
+            }
+
+            .product-modal-price {
+                font-size: 1.5rem;
+            }
+
+            .product-modal-description {
+                font-size: 0.9rem;
+            }
+        }
     </style>
 
     <div class="conversations-container" wire:poll.5s x-data="{ showSidebar: true }" @hide-sidebar.window="showSidebar = false">
@@ -1211,7 +1602,7 @@
                                 @endif
                             </div>
                             
-                            <p class="conversation-product">{{ $conv['product']->title }}</p>
+                            <p class="conversation-product clickable-text" @click.stop.prevent="$wire.selectConversation({{ $conv['id'] }}); if(window.innerWidth < 1024) { setTimeout(() => window.dispatchEvent(new CustomEvent('hide-sidebar')), 100); } setTimeout(() => $dispatch('open-product-modal'), 200);">{{ $conv['product']->title }}</p>
                             
                             @if($conv['last_message'])
                                 @php
@@ -1292,13 +1683,22 @@
                             <span class="chat-user-name">
                                 {{ $this->selectedConversation->getOtherUser(auth()->id())->name }}
                             </span>
-                            <span class="chat-product-name">
+                            <span class="chat-product-name clickable-text" @click="$dispatch('open-product-modal')">
                                 {{ $this->selectedConversation->product->title }}
                             </span>
                         </div>
                     </div>
 
                     <div class="chat-header-right">
+                        <button 
+                            class="view-product-btn"
+                            @click="$dispatch('open-product-modal')"
+                            title="View Product Details">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>View Product</span>
+                        </button>
                         <span class="product-price">
                             €{{ number_format($this->selectedConversation->product->price, 2) }}
                         </span>
@@ -1538,6 +1938,138 @@
             </div>
         @endif
     </div>
+
+    {{-- Product Details Modal --}}
+    @if($this->selectedConversation && $this->selectedConversation->product)
+        <div 
+            class="product-modal-overlay" 
+            id="productModal"
+            x-data="{ show: false }"
+            :class="{ 'show': show }"
+            @open-product-modal.window="show = true"
+            @keydown.escape.window="show = false"
+            x-show="show"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0">
+            <div class="product-modal" @click.away="show = false">
+                <div class="product-modal-header">
+                    <h2>{{ $this->selectedConversation->product->title }}</h2>
+                    <button @click="show = false" class="product-modal-close">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="product-modal-body">
+                    @php
+                        $product = $this->selectedConversation->product;
+                        $hasImages = !empty($product->images) && count($product->images) > 0;
+                        $imageCount = $hasImages ? count($product->images) : 0;
+                    @endphp
+                    
+                    @if($hasImages)
+                        <div x-data="{ modalImageIndex: 0 }" class="product-modal-image-container">
+                            @foreach($product->images as $index => $image)
+                                <img 
+                                    src="{{ Storage::url($image) }}" 
+                                    alt="{{ $product->title }}" 
+                                    class="product-modal-image"
+                                    x-show="modalImageIndex === {{ $index }}"
+                                    x-transition:enter="transition ease-out duration-300"
+                                    x-transition:enter-start="opacity-0"
+                                    x-transition:enter-end="opacity-100"
+                                    x-transition:leave="transition ease-in duration-200"
+                                    x-transition:leave-start="opacity-100"
+                                    x-transition:leave-end="opacity-0">
+                            @endforeach
+                            
+                            @if($imageCount > 1)
+                                <button 
+                                    @click="modalImageIndex = (modalImageIndex - 1 + {{ $imageCount }}) % {{ $imageCount }}"
+                                    class="product-modal-nav product-modal-nav-prev">
+                                    ‹
+                                </button>
+                                <button 
+                                    @click="modalImageIndex = (modalImageIndex + 1) % {{ $imageCount }}"
+                                    class="product-modal-nav product-modal-nav-next">
+                                    ›
+                                </button>
+                                
+                                <div class="product-modal-dots">
+                                    @for($i = 0; $i < $imageCount; $i++)
+                                        <button 
+                                            @click="modalImageIndex = {{ $i }}"
+                                            class="product-modal-dot"
+                                            :class="{ 'active': modalImageIndex === {{ $i }} }">
+                                        </button>
+                                    @endfor
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+                    
+                    <div class="product-modal-content">
+                        <div class="product-modal-price">€{{ number_format($product->price, 2) }}</div>
+                        
+                        <div class="product-modal-badges">
+                            <span class="product-modal-badge" style="background: rgba(255, 255, 255, 0.95); color: #1f2937; backdrop-filter: blur(10px);">
+                                {{ $product->category->name ?? __('discover.card.uncategorized') }}
+                            </span>
+                            <span class="product-modal-badge" style="
+                                @if($product->condition === 'new')
+                                    background: rgba(16, 185, 129, 0.95); color: white;
+                                @elseif($product->condition === 'like_new')
+                                    background: rgba(59, 130, 246, 0.95); color: white;
+                                @else
+                                    background: rgba(251, 146, 60, 0.95); color: white;
+                                @endif
+                            ">
+                                {{ __(sprintf('discover.conditions.%s', $product->condition)) }}
+                            </span>
+                            @if($product->is_negotiable ?? false)
+                                <span class="product-modal-badge" style="background: rgba(139, 92, 246, 0.95); color: white; backdrop-filter: blur(10px); display: flex; align-items: center; gap: 0.25rem;">
+                                    <svg style="width: 14px; height: 14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                    </svg>
+                                    Negotiable
+                                </span>
+                            @endif
+                        </div>
+                        
+                        @if($product->description)
+                            <div class="product-modal-description">{{ $product->description }}</div>
+                        @endif
+                        
+                        <div class="product-modal-meta">
+                            @if($product->location)
+                                <div class="product-modal-meta-item">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    {{ $product->location }}
+                                </div>
+                            @endif
+                            
+                            @if($product->user && $product->user->name)
+                                <div class="product-modal-meta-item">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    {{ $product->user->name }}
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 
     {{-- Counter Offer Modal --}}
     <div 

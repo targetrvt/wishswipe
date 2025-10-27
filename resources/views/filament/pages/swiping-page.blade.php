@@ -606,6 +606,28 @@
             text-transform: uppercase;
         }
 
+        .card-info-button {
+            pointer-events: auto !important;
+            touch-action: manipulation !important;
+            -webkit-tap-highlight-color: transparent !important;
+            z-index: 100 !important;
+        }
+
+        .card-info-button:hover {
+            background: rgba(255, 255, 255, 1) !important;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .card-info-button:active {
+            transform: scale(0.95);
+        }
+
+        .card-info-button:focus {
+            outline: 2px solid rgba(102, 126, 234, 0.5);
+            outline-offset: 2px;
+        }
+
         .swipe-indicator {
             position: absolute;
             top: 50%;
@@ -910,6 +932,16 @@
                 height: 12px;
                 margin-right: 4px;
             }
+
+            .card-info-button {
+                width: 36px !important;
+                height: 36px !important;
+            }
+
+            .card-info-button svg {
+                width: 18px !important;
+                height: 18px !important;
+            }
         }
 
         @media (prefers-color-scheme: dark) {
@@ -1029,6 +1061,20 @@
                             @endif
                         </div>
                         
+                        <!-- Info button on the left -->
+                        <button 
+                            @click.stop="$dispatch('open-product-modal')" 
+                            @touchstart.stop
+                            @mousedown.stop
+                            class="card-info-button"
+                            style="position: absolute; top: 1rem; left: 1rem; background: rgba(255, 255, 255, 0.95); color: #1f2937; backdrop-filter: blur(10px); border: none; padding: 0.5rem; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; width: 40px; height: 40px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);"
+                            title="View Details">
+                            <svg style="width: 20px; height: 20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </button>
+
+                        <!-- Badges on the right -->
                         <div style="position: absolute; top: 1rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
                             <span class="card-badge" style="background: rgba(255, 255, 255, 0.95); color: #1f2937; backdrop-filter: blur(10px);">
                                 {{ $currentProduct['category']['name'] ?? __('discover.card.uncategorized') }}

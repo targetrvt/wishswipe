@@ -48,6 +48,7 @@ class AppPanelProvider extends PanelProvider
                 'warning' => Color::Orange,
             ])
             ->font('Poppins')
+            ->globalSearch(\App\Support\GlobalSearch\WishSwipeGlobalSearchProvider::class)
             ->navigationGroups([
                 'Overview',
                 'Marketplace',

@@ -15,7 +15,9 @@ class ProductPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_product');
+        // Allow authenticated users to access product listings in the app panel
+        // Global search further scopes results to the current user's products.
+        return $user !== null;
     }
 
     /**

@@ -80,7 +80,10 @@ class ProductResource extends Resource
     
     public static function getGlobalSearchEloquentQuery(): Builder
     {
-        return static::getEloquentQuery()->where('user_id', auth()->id());
+        // Ensure global search includes only the current user's listings
+        // and respects soft deletes as per the base query.
+        return parent::getEloquentQuery()
+            ->where('user_id', auth()->id());
     }
 
     public static function form(Form $form): Form

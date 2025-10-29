@@ -19,6 +19,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use LikeABas\FilamentChatgptAgent\ChatgptAgentPlugin;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Swis\Filament\Backgrounds\ImageProviders\MyImages;
+use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
 use App\Http\Middleware\RestrictAdminPanel; // Add this
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
@@ -73,6 +74,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentUsersPlugin::make(),
+                FilamentApexChartsPlugin::make(),
                 FilamentShieldPlugin::make(),
                 ChatgptAgentPlugin::make()
                     ->botName('WishSwipe Support')

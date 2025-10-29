@@ -16,7 +16,7 @@
         "laravel/tinker": "^2.9",
         "leandrocfe/filament-apex-charts": "^3.2",
         "likeabas/filament-chatgpt-agent": "^1.0",
-        "maltekuhr/laravel-gpt": "^0.1.5",
+        "maltekuhr/laravel-gpt": "0.1.5",
         "swisnl/filament-backgrounds": "^1.1",
         "tomatophp/filament-users": "^2.0"
     },

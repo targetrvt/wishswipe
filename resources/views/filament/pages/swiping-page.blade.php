@@ -2,10 +2,10 @@
     <style>
         .filter-filament-container {
             max-width: 500px;
-            margin: -2rem auto 1rem;
+            /* avoid negative top margin so topbar/sticky elements aren't affected */
+            margin: 1rem auto 1rem;
             padding: 0 1rem;
             position: relative;
-            z-index: 50;
         }
 
         .filter-filament-wrapper {
@@ -24,8 +24,8 @@
             width: 100%;
             max-width: 500px;
             height: 600px;
-            margin: -3rem auto 0;
-            z-index: 1;
+            /* keep normal spacing below the topbar to avoid creating unexpected stacking contexts */
+            margin: 1rem auto 0;
         }
 
         .card-stack {

@@ -981,21 +981,27 @@
             display: flex;
             gap: 8px;
             margin-top: 12px;
+            align-items: center;
         }
 
+        /* Keep negotiation buttons readable by giving them a minimum width,
+           preventing shrink, and avoiding text wrapping. On small screens
+           they will collapse back to equal flex widths. */
         .negotiate-btn {
-            flex: 1;
-            display: flex;
+            flex: 1 1 auto;
+            min-width: 96px;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
-            padding: 8px 12px;
+            padding: 10px 12px;
             border-radius: 8px;
             font-size: 13px;
             font-weight: 600;
             border: none;
             cursor: pointer;
             transition: all 0.15s ease;
+            white-space: nowrap;
         }
 
         .negotiate-btn svg {
@@ -1024,10 +1030,21 @@
         .negotiate-btn.counter {
             background: #3b82f6;
             color: white;
+            min-width: 110px;
+            padding: 10px 14px;
         }
 
         .negotiate-btn.counter:hover {
             background: #2563eb;
+        }
+
+        /* On small screens allow the buttons to flex evenly to avoid overflow */
+        @media (max-width: 640px) {
+            .negotiate-btn {
+                flex: 1 1 0;
+                min-width: auto;
+                padding: 8px 10px;
+            }
         }
 
         /* Counter Offer Modal */
